@@ -2,13 +2,6 @@
 
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { 
-  IconPlus, 
-  IconPackageImport, 
-  IconPackageExport,
-  IconFileDownload,
-  IconRefresh
-} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -34,93 +27,68 @@ export function DashboardHeader({ onRefresh, isRefreshing }: DashboardHeaderProp
 
   const quickActions = [
     {
-      label: "Nouveau Produit",
+      label: "Produit",
       href: "/produits/nouveau",
-      icon: IconPlus,
       variant: "default" as const,
     },
     {
-      label: "Entrée Stock",
+      label: "Entrée",
       href: "/inventaire/entrees/nouveau",
-      icon: IconPackageImport,
       variant: "outline" as const,
     },
     {
       label: "Distribution",
       href: "/distributions/nouveau",
-      icon: IconPackageExport,
       variant: "outline" as const,
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Main Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             {greeting}, {firstName}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Voici ce qui se passe dans votre pharmacie aujourd&apos;hui
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {format(currentDate, "EEEE d MMMM yyyy", { locale: fr })}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Last Updated */}
-          <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground mr-2">
-            <span>Mis à jour :</span>
-            <span className="font-medium">
-              {format(currentDate, "HH:mm", { locale: fr })}
-            </span>
-          </div>
-
-          {/* Refresh Button */}
-          {onRefresh && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              className="h-9 w-9"
-            >
-              <IconRefresh className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Date & Quick Actions Bar */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between p-4 rounded-xl bg-muted/50 border">
-        {/* Date Display */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {format(currentDate, "EEEE", { locale: fr })}
-            </span>
-            <span className="text-lg font-semibold text-foreground">
-              {format(currentDate, "d MMMM yyyy", { locale: fr })}
-            </span>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Quick Actions - Desktop */}
+        <div className="hidden sm:flex items-center gap-2">
           {quickActions.map((action) => (
             <Button
               key={action.label}
               variant={action.variant}
               size="sm"
               asChild
-              className="h-9"
+              className="h-8"
             >
-              <Link href={action.href} className="gap-1.5">
-                <action.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{action.label}</span>
+              <Link href={action.href}>
+                + {action.label}
               </Link>
             </Button>
           ))}
         </div>
+      </div>
+
+      {/* Quick Actions - Mobile */}
+      <div className="flex sm:hidden items-center gap-2">
+        {quickActions.map((action) => (
+          <Button
+            key={action.label}
+            variant={action.variant}
+            size="sm"
+            asChild
+            className="h-8 flex-1 text-xs"
+          >
+            <Link href={action.href}>
+              + {action.label}
+            </Link>
+          </Button>
+        ))}
       </div>
     </div>
   );

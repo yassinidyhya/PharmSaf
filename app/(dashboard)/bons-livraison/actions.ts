@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { NoteStatus } from "@prisma/client";
+import { logDeliveryNotePrint } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 export interface DeliveryNoteFilters {
   year?: number;
@@ -179,4 +181,28 @@ export async function getFiltersData() {
   }
 }
 
+export async function logPrintAction(id: string) {
+  try {
+    const note = await prisma.deliveryNote.findUnique({
+      where: { id },
+      include: { hospital: { select: { name: true } } },
+    });
 
+    if (!note) {
+      return { success: false, error: "Bon non trouvé" };
+    }
+
+    const { userId } = await auth();
+    await logDeliveryNotePrint(
+      userId || undefined,
+      note.id,
+      note.noteNumber,
+      note.hospital.name
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Log print error:", error);
+    return { success: false, error: "Erreur lors du logging" };
+  }
+}

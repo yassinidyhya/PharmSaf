@@ -10,6 +10,8 @@ import {
   ParsedStockEntry,
   ParsedHospital,
 } from "@/lib/excel/import";
+import { logImport } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 interface ImportSummary {
   total: number;
@@ -85,6 +87,10 @@ export async function importProducts(fileBuffer: Buffer) {
     }
 
     revalidatePath("/produits");
+
+    // Log activity
+    const { userId } = await auth();
+    await logImport(userId || undefined, "products", summary.total, summary.created, summary.updated);
 
     return {
       success: summary.errors === 0,
@@ -192,6 +198,10 @@ export async function importStockEntries(fileBuffer: Buffer, userId: string) {
     revalidatePath("/inventaire");
     revalidatePath("/inventaire/entrees");
 
+    // Log activity
+    const { userId } = await auth();
+    await logImport(userId || undefined, "stock entries", summary.total, summary.created, summary.updated);
+
     return {
       success: summary.errors === 0,
       summary,
@@ -274,6 +284,10 @@ export async function importHospitals(fileBuffer: Buffer) {
     }
 
     revalidatePath("/hopitaux");
+
+    // Log activity
+    const { userId } = await auth();
+    await logImport(userId || undefined, "hospitals", summary.total, summary.created, summary.updated);
 
     return {
       success: summary.errors === 0,

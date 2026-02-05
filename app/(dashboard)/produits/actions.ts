@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createProductSchema, updateProductSchema } from "@/lib/validation";
 import { z } from "zod";
+import { logProductCreate, logProductUpdate } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 export interface ProductFilters {
   search?: string;
@@ -23,6 +25,10 @@ export async function createProduct(formData: FormData) {
     const product = await prisma.product.create({
       data: validatedData,
     });
+
+    // Log activity
+    const { userId } = await auth();
+    await logProductCreate(userId || undefined, product.id, product.name, product.code);
 
     revalidatePath("/produits");
     return { success: true, data: product };
@@ -131,6 +137,10 @@ export async function updateProduct(id: string, formData: FormData) {
       where: { id },
       data: validatedData,
     });
+
+    // Log activity
+    const { userId } = await auth();
+    await logProductUpdate(userId || undefined, product.id, product.name, validatedData);
 
     revalidatePath("/produits");
     revalidatePath(`/produits/${id}`);

@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getDeliveryNote } from "../../actions";
+import { getDeliveryNote, logPrintAction } from "../../actions";
 import { formatDate, formatNumber, formatCurrency } from "@/lib/utils";
 
 const statusLabels: Record<string, string> = {
@@ -32,6 +32,8 @@ export default function DeliveryNotePDFPage() {
 
   useEffect(() => {
     loadNote();
+    // Log the print action
+    logPrintAction(id);
     const timer = setTimeout(() => {
       window.print();
     }, 1000);

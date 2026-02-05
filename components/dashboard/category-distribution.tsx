@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { Label, Pie, PieChart } from "recharts";
-import { IconChartPie, IconArrowRight } from "@tabler/icons-react";
 
 import {
   Card,
@@ -68,10 +67,6 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
     return chartData.reduce((acc, curr) => acc + curr.value, 0);
   }, [chartData]);
 
-  const totalProducts = React.useMemo(() => {
-    return data.reduce((acc, curr) => acc + curr.count, 0);
-  }, [data]);
-
   const chartConfig = React.useMemo<ChartConfig>(() => {
     const config: ChartConfig = { value: { label: "Stock" } };
     data.forEach((item) => {
@@ -88,12 +83,11 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
     return (
       <Card className="flex flex-col">
         <CardHeader className="items-center pb-0">
-          <CardTitle>Stock par Catégorie</CardTitle>
-          <CardDescription>Répartition du stock total</CardDescription>
+          <CardTitle className="text-base sm:text-lg">Stock par Catégorie</CardTitle>
+          <CardDescription className="text-xs">Répartition du stock</CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center py-12">
+        <CardContent className="flex-1 flex items-center justify-center py-8">
           <div className="text-center text-muted-foreground">
-            <IconChartPie className="size-12 mx-auto mb-2 opacity-20" />
             <p className="text-sm">Aucune donnée disponible</p>
           </div>
         </CardContent>
@@ -106,18 +100,18 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Stock par Catégorie</CardTitle>
-            <CardDescription>Répartition du stock total</CardDescription>
+            <CardTitle className="text-base sm:text-lg">Stock par Catégorie</CardTitle>
+            <CardDescription className="text-xs">Répartition du stock total</CardDescription>
           </div>
         </div>
       </CardHeader>
       
       <CardContent className="flex-1 pb-0">
-        <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
           {/* Chart */}
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square max-h-[220px] flex-1"
+            className="mx-auto aspect-square max-h-[180px] sm:max-h-[200px] flex-1"
           >
             <PieChart>
               <ChartTooltip
@@ -126,13 +120,10 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
                   <ChartTooltipContent
                     hideLabel
                     formatter={(value: number, _name, payload) => (
-                      <div className="flex flex-col gap-1">
-                        <span className="font-medium">{payload?.payload?.name}</span>
-                        <span className="text-muted-foreground">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-xs">{payload?.payload?.name}</span>
+                        <span className="text-muted-foreground text-xs">
                           {formatNumber(value)} unités
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {payload?.payload?.count} produits
                         </span>
                       </div>
                     )}
@@ -143,8 +134,8 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
                 data={chartData}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={55}
-                strokeWidth={3}
+                innerRadius={45}
+                strokeWidth={2}
                 stroke="var(--background)"
               >
                 <Label
@@ -160,14 +151,14 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
                           <tspan
                             x={viewBox.cx}
                             y={viewBox.cy}
-                            className="fill-foreground text-xl font-bold"
+                            className="fill-foreground text-lg font-bold"
                           >
                             {formatNumber(totalStock)}
                           </tspan>
                           <tspan
                             x={viewBox.cx}
-                            y={(viewBox.cy || 0) + 18}
-                            className="fill-muted-foreground text-xs"
+                            y={(viewBox.cy || 0) + 16}
+                            className="fill-muted-foreground text-[10px]"
                           >
                             unités
                           </tspan>
@@ -182,7 +173,7 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
           </ChartContainer>
 
           {/* Legend */}
-          <div className="flex flex-col gap-2 min-w-[140px]">
+          <div className="flex flex-row sm:flex-col flex-wrap justify-center gap-2 sm:gap-1.5 sm:min-w-[120px]">
             {chartData.map((item) => {
               const percentage = totalStock > 0 
                 ? Math.round((item.value / totalStock) * 100) 
@@ -192,18 +183,18 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
                 <Link
                   key={item.category}
                   href={`/produits?category=${item.category}`}
-                  className="group flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="group flex items-center gap-2 p-1.5 rounded-md hover:bg-muted/50 transition-colors"
                 >
                   <div 
-                    className="w-3 h-3 rounded-full shrink-0"
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: item.fill }}
                   />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium truncate group-hover:text-primary transition-colors">
                       {item.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {percentage}% • {formatNumber(item.value)} unités
+                    <p className="text-[10px] text-muted-foreground">
+                      {percentage}% • {formatNumber(item.value)}
                     </p>
                   </div>
                 </Link>
@@ -213,11 +204,10 @@ export function CategoryDistribution({ data }: CategoryDistributionProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-4">
-        <Button variant="ghost" size="sm" className="w-full gap-1" asChild>
+      <CardFooter className="pt-3">
+        <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
           <Link href="/produits">
             Voir tous les produits
-            <IconArrowRight className="w-4 h-4" />
           </Link>
         </Button>
       </CardFooter>

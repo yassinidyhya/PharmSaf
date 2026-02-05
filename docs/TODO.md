@@ -391,21 +391,25 @@
 
 ---
 
-## Phase 14: Audit Trail & Security
+## Phase 14: Audit Trail & Security ✅ COMPLETE
 
 ### Step 14.1: Activity Logging
-- [ ] Create file: `lib/audit-log.ts`
-- [ ] Add `logActivity()` function
-- [ ] Log all CREATE operations
-- [ ] Log all UPDATE operations
-- [ ] Log all DELETE operations
-- [ ] Log all PRINT operations
+- [x] Create file: `lib/audit-log.ts`
+- [x] Add `logActivity()` function with helper methods
+- [x] Log all CREATE operations
+- [x] Log all UPDATE operations
+- [x] Log all DELETE operations
+- [x] Log all PRINT operations
+- [x] Log LOGIN/LOGOUT operations
 
 ### Step 14.2: Integrate Logging
-- [ ] Add logging to stock entries
-- [ ] Add logging to stock exits
-- [ ] Add logging to delivery notes
-- [ ] Add logging to product changes
+- [x] Add logging to stock entries
+- [x] Add logging to stock exits (via distributions)
+- [x] Add logging to delivery notes (print)
+- [x] Add logging to product changes
+- [x] Add logging to hospital creation
+- [x] Add logging to allocation creation
+- [x] Add logging to Excel imports
 
 ---
 

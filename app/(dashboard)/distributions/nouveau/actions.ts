@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Category } from "@prisma/client";
+import { logDistributionCreate } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 const createDistributionSchema = z.object({
   hospitalId: z.string().min(1, "L'hôpital est requis"),
@@ -345,6 +347,20 @@ export async function createDistribution(data: {
 
       return { deliveryNote, stockExits, deliveryItems };
     });
+
+    // Log activity (outside transaction)
+    const hospital = await prisma.hospital.findUnique({
+      where: { id: validatedData.hospitalId },
+      select: { name: true },
+    });
+    const { userId } = await auth();
+    await logDistributionCreate(
+      userId || undefined,
+      results.deliveryNote.id,
+      hospital?.name || "Hôpital inconnu",
+      validatedData.items.length,
+      totalAmount
+    );
 
     revalidatePath("/distributions");
     revalidatePath("/inventaire");

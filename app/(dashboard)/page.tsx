@@ -60,22 +60,22 @@ async function DashboardContent() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Header Section */}
-      <div className="px-4 lg:px-6 pt-6 pb-2">
+      <div className="px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6 pb-2">
         <DashboardHeader />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 space-y-6 p-4 lg:p-6 pt-2">
+      <div className="flex-1 space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6 pt-2">
         {/* Stats Cards */}
         {stats && <StatsCards stats={stats} />}
 
         {/* Category Stats - Stock by Category with Months */}
         {categoryStats.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
-                <h2 className="text-lg font-semibold">Stock par Catégorie</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="text-base sm:text-lg font-semibold">Stock par Catégorie</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Niveaux de stock et mois de couverture
                 </p>
               </div>
@@ -85,37 +85,29 @@ async function DashboardContent() {
         )}
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <CategoryDistribution data={categories} />
           <MovementTrends data={trends} />
         </div>
 
-        {/* Middle Row: Top Hospitals + Alerts + Distribution Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-4">
-            <TopHospitals data={hospitals} />
-          </div>
-          <div className="lg:col-span-4">
-            <DistributionCalendar events={distributions} />
-          </div>
-          <div className="lg:col-span-4">
-            <AlertsWidget alerts={alerts} />
-          </div>
+        {/* Middle Row: Top Hospitals + Distribution Calendar + Alerts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <TopHospitals data={hospitals} />
+          <DistributionCalendar events={distributions} />
+          <AlertsWidget alerts={alerts} />
         </div>
 
         {/* Recent Activity Section */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <h2 className="text-lg font-semibold">Activité Récente</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-base sm:text-lg font-semibold">Activité Récente</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Derniers mouvements de stock
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RecentActivity activities={activities} />
-          </div>
+          <RecentActivity activities={activities} />
         </section>
       </div>
     </div>

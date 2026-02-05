@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { logStockEntryCreate } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 const createStockEntrySchema = z.object({
   productId: z.string().min(1, "Le produit est requis"),
@@ -80,6 +82,20 @@ export async function createStockEntry(formData: FormData) {
         notes: validatedData.notes || null,
       },
     });
+
+    // Log activity
+    const product = await prisma.product.findUnique({
+      where: { id: validatedData.productId },
+      select: { name: true },
+    });
+    const { userId } = await auth();
+    await logStockEntryCreate(
+      userId || undefined,
+      entry.id,
+      product?.name || "Produit inconnu",
+      validatedData.quantity,
+      validatedData.batchNumber
+    );
 
     revalidatePath("/inventaire");
     revalidatePath("/inventaire/entrees");

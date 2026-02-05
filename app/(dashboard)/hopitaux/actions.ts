@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { HospitalType } from "@prisma/client";
+import { logHospitalCreate } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 const createHospitalSchema = z.object({
   code: z.string().min(1, "Le code est requis"),
@@ -117,6 +119,10 @@ export async function createHospital(formData: FormData) {
     const hospital = await prisma.hospital.create({
       data: validatedData,
     });
+
+    // Log activity
+    const { userId } = await auth();
+    await logHospitalCreate(userId || undefined, hospital.id, hospital.name, hospital.code);
 
     revalidatePath("/hopitaux");
     return { success: true, data: hospital };

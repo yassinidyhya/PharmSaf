@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Category } from "@prisma/client";
+import { logAllocationCreate } from "@/lib/audit-log";
+import { auth } from "@clerk/nextjs/server";
 
 const createAllocationSchema = z.object({
   category: z.nativeEnum(Category, {
@@ -69,6 +71,21 @@ export async function createAllocation(hospitalId: string, formData: FormData) {
         budget: validatedData.budget,
       },
     });
+
+    // Log activity
+    const hospital = await prisma.hospital.findUnique({
+      where: { id: hospitalId },
+      select: { name: true },
+    });
+    const { userId } = await auth();
+    await logAllocationCreate(
+      userId || undefined,
+      allocation.id,
+      hospital?.name || "Hôpital inconnu",
+      validatedData.category,
+      validatedData.year,
+      validatedData.budget
+    );
 
     revalidatePath(`/hopitaux/${hospitalId}/allocations`);
     return { success: true, data: allocation };
