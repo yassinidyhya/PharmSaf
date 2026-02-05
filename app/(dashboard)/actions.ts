@@ -6,9 +6,13 @@ import { Category } from "@prisma/client";
 // Types for dashboard data
 export interface DashboardStats {
   totalProducts: number;
+  newProductsThisMonth: number;
   totalStockValue: number;
   lowStockCount: number;
   criticalExpiryCount: number;
+  distributionsCompleted: number;
+  distributionsTotal: number;
+  hospitalsActive: number;
   monthlyStockChange: {
     entries: number;
     exits: number;
@@ -88,7 +92,14 @@ export async function getDashboardStats(): Promise<{
   error?: string;
 }> {
   try {
-    const [products, lowStockBatches, criticalExpiry] = await Promise.all([
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const currentQuarter = Math.floor((new Date().getMonth() / 3)) + 1;
+    const currentYear = new Date().getFullYear();
+
+    const [products, lowStockBatches, criticalExpiry, newProducts, hospitals, deliveryNotes] = await Promise.all([
       // All active products with batches
       prisma.product.findMany({
         where: { isActive: true },
@@ -107,6 +118,25 @@ export async function getDashboardStats(): Promise<{
           quantity: { gt: 0 },
         },
       }),
+      // New products this month
+      prisma.product.count({
+        where: {
+          isActive: true,
+          createdAt: { gte: startOfMonth },
+        },
+      }),
+      // Active hospitals
+      prisma.hospital.count({
+        where: { isActive: true },
+      }),
+      // Delivery notes for current quarter
+      prisma.deliveryNote.findMany({
+        where: {
+          quarter: currentQuarter,
+          year: currentYear,
+        },
+        select: { status: true },
+      }),
     ]);
 
     // Calculate total stock value
@@ -124,11 +154,11 @@ export async function getDashboardStats(): Promise<{
       return totalStock <= product.minStock;
     }).length;
 
-    // Get current month movements
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    // Count distributions
+    const distributionsCompleted = deliveryNotes.filter(n => n.status === "LIVRE").length;
+    const distributionsTotal = deliveryNotes.length;
 
+    // Get current month movements
     const [monthlyEntries, monthlyExits] = await Promise.all([
       prisma.stockEntry.count({
         where: { entryDate: { gte: startOfMonth } },
@@ -142,9 +172,13 @@ export async function getDashboardStats(): Promise<{
       success: true,
       data: {
         totalProducts: products.length,
+        newProductsThisMonth: newProducts,
         totalStockValue,
         lowStockCount,
         criticalExpiryCount: criticalExpiry,
+        distributionsCompleted,
+        distributionsTotal,
+        hospitalsActive: hospitals,
         monthlyStockChange: {
           entries: monthlyEntries,
           exits: monthlyExits,

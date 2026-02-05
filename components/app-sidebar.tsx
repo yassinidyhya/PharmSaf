@@ -13,6 +13,7 @@ import {
   IconTruckDelivery,
   IconUpload,
   IconUsers,
+  IconBabyCarriage,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -69,6 +70,11 @@ const data = {
       title: "Import",
       url: "/import",
       icon: IconUpload,
+    },
+    {
+      title: "Kits Naissance",
+      url: "/kits",
+      icon: IconBabyCarriage,
     },
   ],
   navSecondary: [

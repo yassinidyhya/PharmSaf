@@ -1,5 +1,6 @@
-import { Suspense } from "react";
-import { Metadata } from "next";
+"use client"
+
+import * as React from "react"
 import {
   getDashboardStats,
   getStockByCategory,
@@ -9,68 +10,89 @@ import {
   getRecentActivity,
   getDistributionEvents,
   getCategoryStats,
-} from "./actions";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { StatsCards } from "@/components/dashboard/stats-cards";
-import { CategoryDistribution } from "@/components/dashboard/category-distribution";
-import { MovementTrends } from "@/components/dashboard/movement-trends";
-import { TopHospitals } from "@/components/dashboard/top-hospitals";
-import { AlertsWidget } from "@/components/dashboard/alerts-widget";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { CategoryStats } from "@/components/dashboard/category-stats";
-import { DistributionCalendar } from "@/components/dashboard/distribution-calendar";
-import DashboardLoading from "./loading";
-
-export const metadata: Metadata = {
-  title: "Tableau de Bord | Pharmacie Provinciale",
-  description: "Vue d'ensemble de l'inventaire et des statistiques",
-};
+} from "./actions"
+import { KpiHeader } from "@/components/dashboard/kpi-header"
+import { CategoryStats } from "@/components/dashboard/category-stats"
+import { AlertsWidget } from "@/components/dashboard/alerts-widget"
+import { RecentActivity } from "@/components/dashboard/recent-activity"
+import { CategoryDistribution } from "@/components/dashboard/category-distribution"
+import { MovementTrends } from "@/components/dashboard/movement-trends"
+import { TopHospitals } from "@/components/dashboard/top-hospitals"
+import { DistributionCalendar } from "@/components/dashboard/distribution-calendar"
+import DashboardLoading from "./loading"
 
 // Main dashboard content
-async function DashboardContent() {
-  const [
-    statsResult,
-    categoryResult,
-    trendsResult,
-    hospitalsResult,
-    alertsResult,
-    activityResult,
-    distributionResult,
-    categoryStatsResult,
-  ] = await Promise.all([
-    getDashboardStats(),
-    getStockByCategory(),
-    getStockMovementTrends(90),
-    getTopHospitals(5),
-    getCriticalAlerts(),
-    getRecentActivity(10),
-    getDistributionEvents(),
-    getCategoryStats(),
-  ]);
+function DashboardContent() {
+  const [timeRange, setTimeRange] = React.useState<"7" | "30" | "90" | "365">("30")
+  const [data, setData] = React.useState<{
+    stats: Awaited<ReturnType<typeof getDashboardStats>>["data"]
+    categories: Awaited<ReturnType<typeof getStockByCategory>>["data"]
+    trends: Awaited<ReturnType<typeof getStockMovementTrends>>["data"]
+    hospitals: Awaited<ReturnType<typeof getTopHospitals>>["data"]
+    alerts: Awaited<ReturnType<typeof getCriticalAlerts>>["data"]
+    activities: Awaited<ReturnType<typeof getRecentActivity>>["data"]
+    distributions: Awaited<ReturnType<typeof getDistributionEvents>>["data"]
+    categoryStats: Awaited<ReturnType<typeof getCategoryStats>>["data"]
+  } | null>(null)
 
-  const stats = statsResult.success ? statsResult.data : null;
-  const categories = categoryResult.success ? categoryResult.data : [];
-  const trends = trendsResult.success ? trendsResult.data : [];
-  const hospitals = hospitalsResult.success ? hospitalsResult.data : [];
-  const alerts = alertsResult.success ? alertsResult.data : [];
-  const activities = activityResult.success ? activityResult.data : [];
-  const distributions = distributionResult.success ? distributionResult.data : [];
-  const categoryStats = categoryStatsResult.success ? categoryStatsResult.data : [];
+  React.useEffect(() => {
+    async function fetchData() {
+      const [
+        statsResult,
+        categoryResult,
+        trendsResult,
+        hospitalsResult,
+        alertsResult,
+        activityResult,
+        distributionResult,
+        categoryStatsResult,
+      ] = await Promise.all([
+        getDashboardStats(),
+        getStockByCategory(),
+        getStockMovementTrends(parseInt(timeRange)),
+        getTopHospitals(5),
+        getCriticalAlerts(),
+        getRecentActivity(10),
+        getDistributionEvents(),
+        getCategoryStats(),
+      ])
+
+      setData({
+        stats: statsResult.success ? statsResult.data : null,
+        categories: categoryResult.success ? categoryResult.data : [],
+        trends: trendsResult.success ? trendsResult.data : [],
+        hospitals: hospitalsResult.success ? hospitalsResult.data : [],
+        alerts: alertsResult.success ? alertsResult.data : [],
+        activities: activityResult.success ? activityResult.data : [],
+        distributions: distributionResult.success ? distributionResult.data : [],
+        categoryStats: categoryStatsResult.success ? categoryStatsResult.data : [],
+      })
+    }
+
+    fetchData()
+  }, [timeRange])
+
+  if (!data) {
+    return <DashboardLoading />
+  }
 
   return (
     <div className="flex flex-1 flex-col">
       {/* Header Section */}
       <div className="px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6 pb-2">
-        <DashboardHeader />
+        {data.stats && (
+          <KpiHeader
+            stats={data.stats}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+          />
+        )}
       </div>
 
       {/* Main Content */}
       <div className="flex-1 space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6 pt-2">
-        {/* Stats Cards */}
-        {stats && <StatsCards stats={stats} />}
-
         {/* Category Stats - Stock by Category with Months */}
-        {categoryStats.length > 0 && (
+        {data.categoryStats && data.categoryStats.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
@@ -80,21 +102,21 @@ async function DashboardContent() {
                 </p>
               </div>
             </div>
-            <CategoryStats data={categoryStats} />
+            <CategoryStats data={data.categoryStats} />
           </section>
         )}
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <CategoryDistribution data={categories} />
-          <MovementTrends data={trends} />
+          <CategoryDistribution data={data.categories || []} />
+          <MovementTrends data={data.trends || []} />
         </div>
 
         {/* Middle Row: Top Hospitals + Distribution Calendar + Alerts */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          <TopHospitals data={hospitals} />
-          <DistributionCalendar events={distributions} />
-          <AlertsWidget alerts={alerts} />
+          <TopHospitals data={data.hospitals || []} />
+          <DistributionCalendar events={data.distributions || []} />
+          <AlertsWidget alerts={data.alerts || []} />
         </div>
 
         {/* Recent Activity Section */}
@@ -107,17 +129,13 @@ async function DashboardContent() {
               </p>
             </div>
           </div>
-          <RecentActivity activities={activities} />
+          <RecentActivity activities={data.activities || []} />
         </section>
       </div>
     </div>
-  );
+  )
 }
 
 export default function DashboardPage() {
-  return (
-    <Suspense fallback={<DashboardLoading />}>
-      <DashboardContent />
-    </Suspense>
-  );
+  return <DashboardContent />
 }
