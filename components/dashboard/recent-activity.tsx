@@ -12,15 +12,12 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatDate, formatNumber, formatDateTime } from "@/lib/utils";
+import { formatNumber, formatDateTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { isToday, isYesterday, format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -94,7 +91,7 @@ function formatRelativeTime(date: Date): string {
   if (diffMins < 1) return "À l'instant";
   if (diffMins < 60) return `Il y a ${diffMins} min`;
   if (diffHours < 24) return `Il y a ${diffHours}h`;
-  return formatDate(date);
+  return format(new Date(date), "dd/MM/yyyy");
 }
 
 export function RecentActivity({ activities }: RecentActivityProps) {
@@ -107,41 +104,24 @@ export function RecentActivity({ activities }: RecentActivityProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
-              <IconHistory className="w-5 h-5" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Activité Récente</CardTitle>
-              <CardDescription className="text-xs">
-                {activities.length > 0 ? (
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-emerald-600 font-medium">
-                      {entryCount} entrée{entryCount !== 1 ? 's' : ''}
-                    </span>
-                    <span>•</span>
-                    <span className="text-rose-600 font-medium">
-                      {exitCount} sortie{exitCount !== 1 ? 's' : ''}
-                    </span>
-                  </span>
-                ) : (
-                  "Derniers mouvements de stock"
-                )}
-              </CardDescription>
-            </div>
+      <CardContent className="pt-4">
+        {/* Stats Summary */}
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b">
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-muted-foreground">{entryCount} entrée{entryCount !== 1 ? 's' : ''}</span>
           </div>
-          
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="w-2 h-2 rounded-full bg-rose-500" />
+            <span className="text-muted-foreground">{exitCount} sortie{exitCount !== 1 ? 's' : ''}</span>
+          </div>
           {activities.length > 0 && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs ml-auto">
               {activities.length} récents
             </Badge>
           )}
         </div>
-      </CardHeader>
 
-      <CardContent>
         {activities.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-muted-foreground py-6">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-2">
@@ -151,7 +131,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
             <p className="text-xs mt-0.5">Les mouvements apparaîtront ici</p>
           </div>
         ) : (
-          <ScrollArea className="h-[240px] pr-3">
+          <ScrollArea className="h-[220px] pr-3">
             <div className="space-y-3">
               {groupedActivities.map((group) => (
                 <div key={group.label}>

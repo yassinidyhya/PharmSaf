@@ -218,27 +218,21 @@ function AlertsWidgetSkeleton() {
 // Recent Activity Skeleton
 function RecentActivitySkeleton() {
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-10 rounded-lg" />
-            <div>
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-40 mt-1" />
-            </div>
-          </div>
-          <Skeleton className="h-6 w-20" />
+    <Card>
+      <CardContent className="pt-4">
+        {/* Stats Summary */}
+        <div className="flex items-center gap-3 mb-4 pb-3 border-b">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-5 w-16 ml-auto" />
         </div>
-      </CardHeader>
-      <CardContent className="flex-1">
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            <Skeleton key={i} className="h-14 w-full rounded-lg" />
           ))}
         </div>
       </CardContent>
-      <div className="p-4 pt-2">
+      <div className="p-4 pt-0 pb-3">
         <Skeleton className="h-9 w-full" />
       </div>
     </Card>
@@ -283,6 +277,16 @@ export default function DashboardLoading() {
           </div>
         </div>
 
+        {/* Recent Activity Section */}
+        <section>
+          <div className="mb-4 space-y-2">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentActivitySkeleton />
+          </div>
+        </section>
       </div>
     </div>
   );

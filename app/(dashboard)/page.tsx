@@ -16,7 +16,7 @@ import { CategoryDistribution } from "@/components/dashboard/category-distributi
 import { MovementTrends } from "@/components/dashboard/movement-trends";
 import { TopHospitals } from "@/components/dashboard/top-hospitals";
 import { AlertsWidget } from "@/components/dashboard/alerts-widget";
-
+import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { CategoryStats } from "@/components/dashboard/category-stats";
 import { DistributionCalendar } from "@/components/dashboard/distribution-calendar";
 import DashboardLoading from "./loading";
@@ -103,7 +103,20 @@ async function DashboardContent() {
           </div>
         </div>
 
-
+        {/* Recent Activity Section */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold">Activité Récente</h2>
+              <p className="text-sm text-muted-foreground">
+                Derniers mouvements de stock
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentActivity activities={activities} />
+          </div>
+        </section>
       </div>
     </div>
   );

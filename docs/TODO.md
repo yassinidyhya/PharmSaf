@@ -305,60 +305,62 @@
 
 ---
 
-## Phase 11: Reports & Exports
+## Phase 11: Reports & Exports ✅ COMPLETE
 
 ### Step 11.1: Reports Dashboard
-- [ ] Create folder: `app/(dashboard)/rapports`
-- [ ] Create file: `app/(dashboard)/rapports/page.tsx`
-- [ ] Add report type cards
-- [ ] Quick stats overview
+- [x] Create folder: `app/(dashboard)/rapports`
+- [x] Create file: `app/(dashboard)/rapports/page.tsx`
+- [x] Add report type cards
+- [x] Quick stats overview
 
 ### Step 11.2: Quarterly Report
-- [ ] Create folder: `app/(dashboard)/rapports/trimestriel`
-- [ ] Create file: `app/(dashboard)/rapports/trimestriel/page.tsx`
-- [ ] Select quarter (Q1, Q2, Q3, Q4)
-- [ ] Select year
-- [ ] Generate report with distributions, hospitals, categories
-- [ ] Export to Excel
+- [x] Create folder: `app/(dashboard)/rapports/trimestriel`
+- [x] Create file: `app/(dashboard)/rapports/trimestriel/page.tsx`
+- [x] Select quarter (Q1, Q2, Q3, Q4)
+- [x] Select year
+- [x] Generate report with distributions, hospitals, categories
+- [x] Export to Excel
 
 ### Step 11.3: Annual Report
-- [ ] Create folder: `app/(dashboard)/rapports/annuel`
-- [ ] Create file: `app/(dashboard)/rapports/annuel/page.tsx`
-- [ ] Select year
-- [ ] Generate comprehensive annual report
-- [ ] Export to Excel
+- [x] Create folder: `app/(dashboard)/rapports/annuel`
+- [x] Create file: `app/(dashboard)/rapports/annuel/page.tsx`
+- [x] Select year
+- [x] Generate comprehensive annual report
+- [x] Export to Excel
 
 ### Step 11.4: Activity Report
-- [ ] Create folder: `app/(dashboard)/rapports/activite`
-- [ ] Create file: `app/(dashboard)/rapports/activite/page.tsx`
-- [ ] Show activity logs
-- [ ] Filter by user, date, action type
-- [ ] Export to Excel
+- [x] Create folder: `app/(dashboard)/rapports/activite`
+- [x] Create file: `app/(dashboard)/rapports/activite/page.tsx`
+- [x] Show activity logs
+- [x] Filter by user, date, action type
+- [x] Export to Excel
 
 ### Step 11.5: Excel Export Functions
-- [ ] Create file: `lib/excel-export.ts`
-- [ ] Add `exportStockReport()` function
-- [ ] Add `exportQuarterlyReport()` function
-- [ ] Add `exportActivityLogs()` function
-- [ ] Add API routes for Excel downloads
+- [x] Create file: `lib/excel-export.ts`
+- [x] Add `exportStockReport()` function
+- [x] Add `exportQuarterlyReport()` function
+- [x] Add `exportActivityLogs()` function
+- [x] Add `exportAnnualReport()` function
+- [x] Add `exportStockInventory()` function
 
 ---
 
-## Phase 12: Excel Import
+## Phase 12: Excel Import ✅ COMPLETE
 
 ### Step 12.1: Import Page
-- [ ] Create folder: `app/(dashboard)/import`
-- [ ] Create file: `app/(dashboard)/import/page.tsx`
-- [ ] Add file upload component
-- [ ] Support file types: .xlsx, .xls
+- [x] Create folder: `app/(dashboard)/import`
+- [x] Create file: `app/(dashboard)/import/page.tsx`
+- [x] Add file upload component
+- [x] Support file types: .xlsx, .xls
 
 ### Step 12.2: Import Functions
-- [ ] Create file: `lib/excel/import.ts`
-- [ ] Add `parseProductsExcel()` function
-- [ ] Add `parseStockEntriesExcel()` function
-- [ ] Add `parseHospitalsExcel()` function
-- [ ] Add validation for imported data
-- [ ] Add preview before import
+- [x] Create file: `lib/excel/import.ts`
+- [x] Add `parseProductsExcel()` function
+- [x] Add `parseStockEntriesExcel()` function
+- [x] Add `parseHospitalsExcel()` function
+- [x] Add validation for imported data
+- [x] Add preview before import
+- [x] Create file: `app/(dashboard)/import/actions.ts`
 
 ---
 
