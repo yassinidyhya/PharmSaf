@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Enums
+enum Category {
+  MEDICAMENT
+  VACCIN
+  REACTIF
+  CONSOMMABLE
+  PETIT_MATERIEL
+  MATERIEL_BUREAU
+}
+
+enum HospitalType {
+  CENTRE_HOSPITALIER
+  CENTRE_SANTE
+  HOPITAL_PROVINCIAL
+}
+
+enum NoteStatus {
+  BROUILLON
+  VALIDE
+  LIVRE
+}
+
+enum ActionType {
+  CREATE
+  UPDATE
+  DELETE
+  PRINT
+  LOGIN
+  LOGOUT
+}
+
+// Models
+model User {
+  id            String    @id @default(uuid())
+  clerkId       String    @unique
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  role          String    @default("USER")
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  activities    ActivityLog[]
+}
+
+model Hospital {
+  id                String             @id @default(uuid())
+  code              String             @unique
+  name              String
+  type              HospitalType
+  address           String?
+  phone             String?
+  email             String?
+  bedCapacity       Int?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  allocations       AnnualAllocation[]
+  stockExits        StockExit[]
+  deliveryNotes     DeliveryNote[]
+}
+
+model Product {
+  id            String        @id @default(uuid())
+  code          String        @unique
+  name          String
+  category      Category
+  unit          String
+  packaging     String?
+  price         Decimal?      @db.Decimal(10, 2)
+  minStock      Int           @default(0)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  batches       Batch[]
+  stockEntries  StockEntry[]
+  stockExits    StockExit[]
+  kitComponents KitComponent[]
+}
+
+model Batch {
+  id            String        @id @default(uuid())
+  batchNumber   String
+  productId     String
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int
+  expiryDate    DateTime
+  temperature   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  stockEntries  StockEntry[]
+  stockExits    StockExit[]
+  deliveryItems DeliveryNoteItem[]
+
+  @@unique([batchNumber, productId])
+}
+
+model StockEntry {
+  id            String    @id @default(uuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchId       String?
+  batch         Batch?    @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  quantity      Int
+  referenceDoc  String?
+  notes         String?
+  entryDate     DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model StockExit {
+  id            String    @id @default(uuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchId       String?
+  batch         Batch?    @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  hospitalId    String
+  hospital      Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  quantity      Int
+  quarter       Int
+  year          Int
+  notes         String?
+  exitDate      DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deliveryNote  DeliveryNote? @relation(fields: [deliveryNoteId], references: [id])
+  deliveryNoteId String?
+}
+
+model AnnualAllocation {
+  id          String    @id @default(uuid())
+  hospitalId  String
+  hospital    Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  category    Category
+  year        Int
+  budget      Decimal   @db.Decimal(12, 2)
+  q1Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  q2Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  q3Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  q4Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([hospitalId, category, year])
+}
+
+model DeliveryNote {
+  id            String              @id @default(uuid())
+  noteNumber    String              @unique
+  hospitalId    String
+  hospital      Hospital            @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  quarter       Int
+  year          Int
+  status        NoteStatus          @default(BROUILLON)
+  totalAmount   Decimal?            @db.Decimal(12, 2)
+  deliveredAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  items         DeliveryNoteItem[]
+  stockExits    StockExit[]
+}
+
+model DeliveryNoteItem {
+  id              String        @id @default(uuid())
+  deliveryNoteId  String
+  deliveryNote    DeliveryNote  @relation(fields: [deliveryNoteId], references: [id], onDelete: Cascade)
+  batchId         String
+  batch           Batch         @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  quantity        Int
+  unitPrice       Decimal       @db.Decimal(10, 2)
+  totalPrice      Decimal       @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now())
+}
+
+model BirthKit {
+  id            String          @id @default(uuid())
+  kitNumber     String          @unique
+  kitType       String          // NORMAL or EPISIOTOMIE
+  isComplete    Boolean         @default(false)
+  isDistributed Boolean         @default(false)
+  distributedAt DateTime?
+  hospitalId    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  components    KitComponent[]
+}
+
+model KitComponent {
+  id          String    @id @default(uuid())
+  kitId       String
+  kit         BirthKit  @relation(fields: [kitId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity    Int
+  isPresent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ActivityLog {
+  id          String      @id @default(uuid())
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      ActionType
+  entityType  String      // e.g., "Product", "StockEntry", "DeliveryNote"
+  entityId    String?
+  description String?
+  metadata    String?     @db.Text
+  createdAt   DateTime    @default(now())
+}
