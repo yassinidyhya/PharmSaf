@@ -61,9 +61,10 @@ interface StockExitItem {
 interface MultiStockExitFormProps {
   products: ProductWithBatches[];
   hospitals: Hospital[];
+  isInsulinMode?: boolean;
 }
 
-export function MultiStockExitForm({ products, hospitals }: MultiStockExitFormProps) {
+export function MultiStockExitForm({ products, hospitals, isInsulinMode = false }: MultiStockExitFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [step, setStep] = useState(1);
   
@@ -244,46 +245,60 @@ export function MultiStockExitForm({ products, hospitals }: MultiStockExitFormPr
                 </Select>
               </Field>
 
-              {/* Quarter & Year */}
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <Field>
-                  <FieldLabel>Trimestre *</FieldLabel>
-                  <Select 
-                    value={quarter.toString()} 
-                    onValueChange={(v) => setQuarter(parseInt(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">T1 (Jan-Mar)</SelectItem>
-                      <SelectItem value="2">T2 (Avr-Juin)</SelectItem>
-                      <SelectItem value="3">T3 (Juil-Sep)</SelectItem>
-                      <SelectItem value="4">T4 (Oct-Déc)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
+              {/* Quarter & Year - Hidden in Insulin Mode */}
+              {!isInsulinMode && (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                  <Field>
+                    <FieldLabel>Trimestre *</FieldLabel>
+                    <Select 
+                      value={quarter.toString()} 
+                      onValueChange={(v) => setQuarter(parseInt(v))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">T1 (Jan-Mar)</SelectItem>
+                        <SelectItem value="2">T2 (Avr-Juin)</SelectItem>
+                        <SelectItem value="3">T3 (Juil-Sep)</SelectItem>
+                        <SelectItem value="4">T4 (Oct-Déc)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
 
-                <Field>
-                  <FieldLabel>Année *</FieldLabel>
-                  <Input
-                    type="number"
-                    min="2020"
-                    max="2100"
-                    value={year}
-                    onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
-                  />
-                </Field>
+                  <Field>
+                    <FieldLabel>Année *</FieldLabel>
+                    <Input
+                      type="number"
+                      min="2020"
+                      max="2100"
+                      value={year}
+                      onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
+                    />
+                  </Field>
 
+                  <Field>
+                    <FieldLabel>Date de sortie</FieldLabel>
+                    <Input
+                      type="date"
+                      value={exitDate}
+                      onChange={(e) => setExitDate(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              )}
+
+              {/* Date only for Insulin Mode */}
+              {isInsulinMode && (
                 <Field>
-                  <FieldLabel>Date de sortie</FieldLabel>
+                  <FieldLabel>Date de distribution</FieldLabel>
                   <Input
                     type="date"
                     value={exitDate}
                     onChange={(e) => setExitDate(e.target.value)}
                   />
                 </Field>
-              </div>
+              )}
 
               {/* Notes */}
               <Field>
@@ -529,7 +544,9 @@ export function MultiStockExitForm({ products, hospitals }: MultiStockExitFormPr
               <div>
                 <div className="font-medium">{selectedHospital.name}</div>
                 <div className="text-sm text-muted-foreground">
-                  {hospitalTypeLabels[selectedHospital.type]} • T{quarter} {year}
+                  {hospitalTypeLabels[selectedHospital.type]}
+                  {!isInsulinMode && ` • T${quarter} ${year}`}
+                  {isInsulinMode && " • Distribution immédiate"}
                 </div>
               </div>
               <div className="ml-auto text-right">
