@@ -37,6 +37,7 @@ import { Category } from "@/lib/types";
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicament",
   VACCIN: "Vaccin",
+  INSULINE: "Insuline",
   REACTIF: "Réactif",
   CONSOMMABLE: "Consommable",
   PETIT_MATERIEL: "Petit matériel",
@@ -46,7 +47,7 @@ const categoryLabels: Record<Category, string> = {
 const urgencyConfig = {
   critical: {
     label: "Critique",
-    color: "bg-red-100 text-red-800 border-red-200",
+    color: "bg-amber-100 text-amber-800 border-amber-200",
     icon: AlertTriangle,
     daysText: "≤ 30 jours",
   },
@@ -58,7 +59,7 @@ const urgencyConfig = {
   },
   notice: {
     label: "À surveiller",
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    color: "bg-sky-100 text-sky-800 border-sky-200",
     icon: Calendar,
     daysText: "61-90 jours",
   },
@@ -128,15 +129,15 @@ export default function ExpiryAlertsPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card className="border-red-200 dark:border-red-800">
+          <Card className="border-amber-200 dark:border-amber-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-red-600">
+              <CardTitle className="text-sm font-medium text-amber-600">
                 Critique (≤30j)
               </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-500" />
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-amber-600">
                 {formatNumber(data?.stats.critical.count || 0)}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -318,10 +319,10 @@ export default function ExpiryAlertsPage() {
                             variant="outline"
                             className={`tabular-nums ${
                               batch.daysUntilExpiry <= 30
-                                ? "border-red-200 text-red-600 bg-red-50 dark:bg-red-950/30"
+                                ? "border-amber-200 text-amber-600 bg-amber-50 dark:bg-amber-950/30"
                                 : batch.daysUntilExpiry <= 60
                                 ? "border-orange-200 text-orange-600 bg-orange-50 dark:bg-orange-950/30"
-                                : "border-yellow-200 text-yellow-600 bg-yellow-50 dark:bg-yellow-950/30"
+                                : "border-sky-200 text-sky-600 bg-sky-50 dark:bg-sky-950/30"
                             }`}
                           >
                             {batch.daysUntilExpiry}j

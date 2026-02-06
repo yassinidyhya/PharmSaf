@@ -119,7 +119,7 @@ export function KpiHeader({ stats, dateRange, onDateRangeChange }: KpiHeaderProp
       value: formatNumber(stats.lowStockCount),
       subtext: "Stock faible",
       href: "/inventaire",
-      variant: stats.lowStockCount > 0 ? ("destructive" as const) : ("default" as const),
+      variant: stats.lowStockCount > 0 ? ("warning" as const) : ("default" as const),
       icon: IconAlertTriangle,
     },
     {
@@ -127,7 +127,7 @@ export function KpiHeader({ stats, dateRange, onDateRangeChange }: KpiHeaderProp
       value: formatNumber(stats.criticalExpiryCount),
       subtext: "< 30 jours",
       href: "/inventaire/peremption",
-      variant: stats.criticalExpiryCount > 0 ? ("destructive" as const) : ("default" as const),
+      variant: stats.criticalExpiryCount > 0 ? ("warning" as const) : ("default" as const),
       icon: IconCalendarOff,
     },
     {
@@ -298,10 +298,11 @@ export function KpiHeader({ stats, dateRange, onDateRangeChange }: KpiHeaderProp
                   <TooltipTrigger asChild>
                     <Link href={kpi.href}>
                       <Badge
-                        variant={kpi.variant === "default" ? "outline" : kpi.variant}
+                        variant={kpi.variant === "default" || kpi.variant === "warning" ? "outline" : kpi.variant}
                         className={cn(
                           "cursor-pointer hover:bg-muted transition-colors h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs font-normal gap-1 sm:gap-1.5",
-                          kpi.variant === "default" && "hover:border-primary/50"
+                          kpi.variant === "default" && "hover:border-primary/50",
+                          kpi.variant === "warning" && "bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200 hover:border-amber-400 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800"
                         )}
                       >
                         <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />

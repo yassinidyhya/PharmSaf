@@ -59,7 +59,7 @@ export async function getCurrentUserId(): Promise<string | null> {
 
 /**
  * Requires authentication. Throws if not authenticated.
- * Useful for server actions that must have a user.
+ * All server actions should call this at the start.
  */
 export async function requireAuth(): Promise<User> {
   const user = await getOrCreateUser();

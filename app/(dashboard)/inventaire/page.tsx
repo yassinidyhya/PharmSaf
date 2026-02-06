@@ -307,7 +307,7 @@ export default function InventoryPage() {
                 value={formatNumber(data.stats?.lowStockProducts?.length || 0)}
                 subtext="Stock faible"
                 href="/inventaire"
-                variant={data.stats?.lowStockProducts?.length > 0 ? "destructive" : "default"}
+                variant={data.stats?.lowStockProducts?.length > 0 ? "warning" : "default"}
               />
               <Separator orientation="vertical" className="h-3 sm:h-4 mx-0.5 hidden sm:block" />
               <KpiBadge
@@ -316,7 +316,7 @@ export default function InventoryPage() {
                 value={formatNumber(data.stats?.expiringStats?.critical || 0)}
                 subtext="< 30 jours"
                 href="/inventaire/peremption"
-                variant={data.stats?.expiringStats?.critical > 0 ? "destructive" : "default"}
+                variant={data.stats?.expiringStats?.critical > 0 ? "warning" : "default"}
               />
               <Separator orientation="vertical" className="h-3 sm:h-4 mx-0.5 hidden sm:block" />
               <KpiBadge
@@ -401,14 +401,15 @@ function KpiBadge({
   value: string
   subtext?: string
   href: string
-  variant?: "default" | "destructive"
+  variant?: "default" | "warning"
 }) {
   const badge = (
     <Badge
-      variant={variant === "default" ? "outline" : variant}
+      variant={variant === "default" ? "outline" : "outline"}
       className={cn(
         "cursor-pointer hover:bg-muted transition-colors h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs font-normal gap-1 sm:gap-1.5",
-        variant === "default" && "hover:border-primary/50"
+        variant === "default" && "hover:border-primary/50",
+        variant === "warning" && "bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200 hover:border-amber-400 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800"
       )}
     >
       <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -466,7 +467,7 @@ function CategoryStatsGrid({ data }: { data: any[] }) {
             <Card
               className={cn(
                 "h-full transition-all duration-200 hover:shadow-md hover:border-primary/20",
-                isCritical ? "border-rose-200" : isLowStock ? "border-amber-200" : "border-border/50"
+                isCritical ? "border-amber-200" : isLowStock ? "border-amber-200" : "border-border/50"
               )}
             >
               <CardContent className="p-3 sm:p-4">
@@ -614,12 +615,12 @@ function AlertsSection({
         />
 
         {/* Low Stock Alerts */}
-        <Card className={cn(lowStockProducts.length > 0 && "border-rose-200 dark:border-rose-800")}>
+        <Card className={cn(lowStockProducts.length > 0 && "border-amber-200 dark:border-amber-800")}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  <IconAlertTriangle className={cn("h-4 w-4", lowStockProducts.length > 0 ? "text-rose-600" : "text-muted-foreground")} />
+                  <IconAlertTriangle className={cn("h-4 w-4", lowStockProducts.length > 0 ? "text-amber-600" : "text-muted-foreground")} />
                   Stock Faible
                 </CardTitle>
                 <CardDescription className="text-[10px] sm:text-xs">
@@ -629,7 +630,7 @@ function AlertsSection({
                 </CardDescription>
               </div>
               {lowStockProducts.length > 0 && (
-                <Badge variant="destructive" className="text-[10px] sm:text-xs">
+                <Badge className="text-[10px] sm:text-xs bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200">
                   {lowStockProducts.length}
                 </Badge>
               )}
@@ -650,14 +651,14 @@ function AlertsSection({
                     <Link
                       key={product.id}
                       href={`/produits/${product.id}`}
-                      className="flex items-center justify-between p-2 sm:p-2.5 rounded-lg border bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/30 dark:border-rose-800 dark:text-rose-100 hover:shadow-sm transition-all"
+                      className="flex items-center justify-between p-2 sm:p-2.5 rounded-lg border bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-100 hover:shadow-sm transition-all"
                     >
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-xs sm:text-sm truncate">{product.name}</p>
                         <p className="text-[10px] sm:text-xs opacity-70">{product.code}</p>
                       </div>
                       <div className="text-right shrink-0 ml-2">
-                        <p className="text-sm font-bold text-rose-600">{formatNumber(product.totalStock || 0)}</p>
+                        <p className="text-sm font-bold text-amber-600">{formatNumber(product.totalStock || 0)}</p>
                         <p className="text-[9px] sm:text-[10px] opacity-60">Min: {product.minStock}</p>
                       </div>
                     </Link>
@@ -704,14 +705,14 @@ function ExpiryAlertsCard({
   const hasMore = sortedBatches.length > 8
 
   return (
-    <Card className={cn("h-full flex flex-col", criticalCount > 0 && "border-rose-200 dark:border-rose-800")}>
+    <Card className={cn("h-full flex flex-col", criticalCount > 0 && "border-amber-200 dark:border-amber-800")}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
               criticalCount > 0 
-                ? "bg-rose-100 text-rose-600 dark:bg-rose-950/50" 
+                ? "bg-amber-100 text-amber-600 dark:bg-amber-950/50" 
                 : warningCount > 0 
                   ? "bg-amber-100 text-amber-600 dark:bg-amber-950/50"
                   : "bg-blue-100 text-blue-600 dark:bg-blue-950/50"
@@ -724,7 +725,7 @@ function ExpiryAlertsCard({
                 {batches.length > 0 ? (
                   <span className="flex items-center gap-1.5">
                     {criticalCount > 0 && (
-                      <span className="text-rose-600 font-medium">
+                      <span className="text-amber-600 font-medium">
                         {criticalCount} critique{criticalCount > 1 ? "s" : ""}
                       </span>
                     )}
@@ -746,8 +747,15 @@ function ExpiryAlertsCard({
           </div>
           {batches.length > 0 && (
             <Badge 
-              variant={criticalCount > 0 ? "destructive" : warningCount > 0 ? "default" : "outline"} 
-              className="text-[10px] sm:text-xs h-5 sm:h-6"
+              variant="outline"
+              className={cn(
+                "text-[10px] sm:text-xs h-5 sm:h-6",
+                criticalCount > 0 
+                  ? "bg-amber-100 text-amber-800 border-amber-300" 
+                  : warningCount > 0 
+                    ? "bg-orange-100 text-orange-800 border-orange-300"
+                    : ""
+              )}
             >
               {displayCount}/{batches.length}
             </Badge>
@@ -779,9 +787,9 @@ function ExpiryAlertsCard({
                     className={cn(
                       "block p-2.5 sm:p-3 rounded-lg border transition-all hover:shadow-sm relative overflow-hidden",
                       isCritical
-                        ? "bg-rose-50 border-rose-200 dark:bg-rose-950/30 dark:border-rose-800"
-                        : isWarning
                         ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800"
+                        : isWarning
+                        ? "bg-orange-50 border-orange-200 dark:bg-orange-950/30 dark:border-orange-800"
                         : "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800"
                     )}
                   >
@@ -789,7 +797,7 @@ function ExpiryAlertsCard({
                     <div 
                       className={cn(
                         "absolute bottom-0 left-0 h-0.5 transition-all",
-                        isCritical ? "bg-rose-500" : isWarning ? "bg-amber-500" : "bg-blue-500"
+                        isCritical ? "bg-amber-500" : isWarning ? "bg-orange-500" : "bg-blue-500"
                       )}
                       style={{ width: `${progressValue}%` }}
                     />
@@ -799,7 +807,7 @@ function ExpiryAlertsCard({
                         <div className="flex items-center gap-1.5">
                           <p className="font-medium text-xs sm:text-sm truncate">{batch.product.name}</p>
                           {isCritical && (
-                            <IconAlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                            <IconAlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                           )}
                         </div>
                         <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
@@ -812,9 +820,9 @@ function ExpiryAlertsCard({
                           className={cn(
                             "text-xs font-bold tabular-nums h-6",
                             isCritical 
-                              ? "border-rose-300 text-rose-700 bg-rose-100 dark:bg-rose-900/50 dark:text-rose-300" 
+                              ? "border-amber-300 text-amber-700 bg-amber-100 dark:bg-amber-900/50 dark:text-amber-300" 
                               : isWarning 
-                                ? "border-amber-300 text-amber-700 bg-amber-100 dark:bg-amber-900/50 dark:text-amber-300"
+                                ? "border-orange-300 text-orange-700 bg-orange-100 dark:bg-orange-900/50 dark:text-orange-300"
                                 : "border-blue-300 text-blue-700 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300"
                           )}
                         >

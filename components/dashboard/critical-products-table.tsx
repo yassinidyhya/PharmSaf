@@ -151,12 +151,13 @@ export function CriticalProductsTable({ data }: CriticalProductsTableProps) {
               className={cn(
                 "text-xs",
                 days <= 0 ? "border-rose-300 text-rose-700 bg-rose-50" :
-                days <= 7 ? "border-rose-300 text-rose-700 bg-rose-50" :
+                days <= 7 ? "border-orange-300 text-orange-700 bg-orange-50" :
                 days <= 30 ? "border-amber-300 text-amber-700 bg-amber-50" :
-                "border-slate-300"
+                days <= 60 ? "border-blue-300 text-blue-700 bg-blue-50" :
+                "border-emerald-300 text-emerald-700 bg-emerald-50"
               )}
             >
-              {days <= 0 ? `Périmé ${Math.abs(days)}j` : `${days}j`}
+              {days <= 0 ? `Périmé` : `${days}j`}
             </Badge>
             {batchNumber && (
               <p className="text-[10px] text-muted-foreground mt-0.5">Lot: {batchNumber}</p>
@@ -189,8 +190,13 @@ export function CriticalProductsTable({ data }: CriticalProductsTableProps) {
         return (
           <div className="flex flex-col gap-0.5">
             <Badge 
-              variant={urgency === "CRITICAL" ? "destructive" : urgency === "WARNING" ? "secondary" : "outline"}
-              className="text-[10px] sm:text-xs w-fit gap-0.5 sm:gap-1 px-1 sm:px-2"
+              variant="outline"
+              className={cn(
+                "text-[10px] sm:text-xs w-fit gap-0.5 sm:gap-1 px-1 sm:px-2",
+                urgency === "CRITICAL" ? "bg-orange-100 text-orange-700 border-orange-300" : 
+                urgency === "WARNING" ? "bg-amber-100 text-amber-700 border-amber-300" : 
+                "bg-blue-100 text-blue-700 border-blue-300"
+              )}
             >
               <IconAlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="hidden sm:inline">{labels[urgency]}</span>

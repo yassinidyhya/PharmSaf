@@ -2,10 +2,8 @@
 
 export enum Category {
   MEDICAMENT = "MEDICAMENT",
-  DISPOSITIF = "DISPOSITIF",
-  INSULINE = "INSULINE",
-  KIT_NAISSANCE = "KIT_NAISSANCE",
   VACCIN = "VACCIN",
+  INSULINE = "INSULINE",
   REACTIF = "REACTIF",
   CONSOMMABLE = "CONSOMMABLE",
   PETIT_MATERIEL = "PETIT_MATERIEL",
@@ -38,13 +36,6 @@ export enum ActionType {
   CONSULTER = "CONSULTER",
   LOGIN = "LOGIN",
   LOGOUT = "LOGOUT",
-}
-
-export enum Role {
-  ADMIN = "ADMIN",
-  PHARMACIEN = "PHARMACIEN",
-  ASSISTANT = "ASSISTANT",
-  GUEST = "GUEST",
 }
 
 // Type definitions for client components
@@ -92,6 +83,5 @@ export interface User {
   email: string;
   name: string;
   phone?: string | null;
-  role: Role;
   createdAt?: Date;
 }

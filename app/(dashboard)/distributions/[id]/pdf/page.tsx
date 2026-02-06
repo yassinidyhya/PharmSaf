@@ -20,6 +20,7 @@ import { formatDate, formatNumber, formatCurrency } from "@/lib/utils";
 const categoryLabels: Record<string, string> = {
   MEDICAMENT: "Médicament",
   VACCIN: "Vaccin",
+  INSULINE: "Insuline",
   REACTIF: "Réactif",
   CONSOMMABLE: "Consommable",
   PETIT_MATERIEL: "Petit matériel",

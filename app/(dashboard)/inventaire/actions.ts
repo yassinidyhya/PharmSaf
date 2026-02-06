@@ -49,6 +49,7 @@ export interface ExpiringBatchDetail {
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Medicaments",
   VACCIN: "Vaccins",
+  INSULINE: "Insuline",
   REACTIF: "Reactifs",
   CONSOMMABLE: "Consommables",
   PETIT_MATERIEL: "Petit materiel",
@@ -58,6 +59,7 @@ const categoryLabels: Record<Category, string> = {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "#3b82f6",
   VACCIN: "#22c55e",
+  INSULINE: "#ef4444",
   REACTIF: "#a855f7",
   CONSOMMABLE: "#f97316",
   PETIT_MATERIEL: "#6b7280",
@@ -93,7 +95,11 @@ export async function getInventoryStats() {
 
       // Low stock alert
       if (totalStock <= product.minStock) {
-        lowStockProducts.push({ ...product, totalStock } as typeof product & { totalStock: number });
+        lowStockProducts.push({ 
+          ...product, 
+          totalStock,
+          price: product.price ? Number(product.price) : null,
+        } as typeof product & { totalStock: number });
       }
 
       // Stock value

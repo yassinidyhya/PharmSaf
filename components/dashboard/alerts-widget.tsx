@@ -33,17 +33,17 @@ interface AlertsWidgetProps {
 const severityConfig = {
   CRITICAL: { 
     label: "Critique",
-    colors: "bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/30 dark:border-rose-800 dark:text-rose-100",
+    colors: "bg-gradient-to-br from-orange-50 to-amber-50 border-orange-300 text-orange-900 dark:from-orange-950/40 dark:to-amber-950/40 dark:border-orange-700 dark:text-orange-100 shadow-sm",
     icon: IconAlertCircle,
   },
   WARNING: { 
     label: "Attention",
-    colors: "bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-100",
+    colors: "bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-300 text-amber-900 dark:from-amber-950/40 dark:to-yellow-950/40 dark:border-amber-700 dark:text-amber-100",
     icon: IconClock,
   },
   NOTICE: { 
     label: "Info",
-    colors: "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-800 dark:text-blue-100",
+    colors: "bg-gradient-to-br from-sky-50 to-blue-50 border-sky-300 text-sky-900 dark:from-sky-950/40 dark:to-blue-950/40 dark:border-sky-700 dark:text-sky-100",
     icon: IconClock,
   },
 };
@@ -80,18 +80,18 @@ export function AlertsWidget({ alerts }: AlertsWidgetProps) {
               {alerts.length > 0 ? (
                 <span className="flex items-center gap-1 sm:gap-1.5">
                   {criticalCount > 0 && (
-                    <span className="text-rose-600 font-medium">
+                    <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent font-semibold">
                       {criticalCount} critique{criticalCount > 1 ? 's' : ''}
                     </span>
                   )}
-                  {criticalCount > 0 && warningCount > 0 && <span>•</span>}
+                  {criticalCount > 0 && warningCount > 0 && <span className="text-muted-foreground">•</span>}
                   {warningCount > 0 && (
-                    <span className="text-amber-600 font-medium">
+                    <span className="bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent font-semibold">
                       {warningCount} avertissement{warningCount > 1 ? 's' : ''}
                     </span>
                   )}
                   {alerts.length > 0 && criticalCount === 0 && warningCount === 0 && (
-                    <span>{alerts.length} info</span>
+                    <span className="text-sky-600 font-medium">{alerts.length} info</span>
                   )}
                 </span>
               ) : (

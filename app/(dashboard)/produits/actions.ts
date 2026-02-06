@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createProductSchema, updateProductSchema } from "@/lib/validation";
 import { z } from "zod";
 import { Category } from "@prisma/client";
-import { logProductCreate, logProductUpdate } from "@/lib/audit-log";
+import { logProductCreate, logProductUpdate, logCreate } from "@/lib/audit-log";
 import { getCurrentUserId } from "@/lib/auth";
 
 export interface ProductFilters {
@@ -21,18 +21,60 @@ export async function createProduct(formData: FormData) {
       ...rawData,
       price: rawData.price ? parseFloat(rawData.price as string) : undefined,
       minStock: parseInt(rawData.minStock as string) || 0,
+      initialQuantity: rawData.initialQuantity ? parseInt(rawData.initialQuantity as string) : undefined,
+      batchNumber: rawData.batchNumber as string | undefined,
+      expiryDate: rawData.expiryDate as string | undefined,
     });
 
+    // Create product
     const product = await prisma.product.create({
-      data: validatedData,
+      data: {
+        code: validatedData.code,
+        name: validatedData.name,
+        category: validatedData.category,
+        unit: validatedData.unit,
+        packaging: validatedData.packaging,
+        price: validatedData.price,
+        minStock: validatedData.minStock,
+      },
     });
+
+    // Create initial batch and stock entry if quantity provided
+    if (validatedData.initialQuantity && validatedData.initialQuantity > 0) {
+      const userId = await getCurrentUserId();
+      
+      // Create batch
+      const batch = await prisma.batch.create({
+        data: {
+          productId: product.id,
+          batchNumber: validatedData.batchNumber || "INIT-001",
+          quantity: validatedData.initialQuantity,
+          expiryDate: validatedData.expiryDate ? new Date(validatedData.expiryDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      // Create stock entry
+      await prisma.stockEntry.create({
+        data: {
+          productId: product.id,
+          batchId: batch.id,
+          quantity: validatedData.initialQuantity,
+          entryDate: new Date(),
+          notes: "Stock initial",
+        },
+      });
+
+      // Log stock entry creation
+      await logCreate(userId || undefined, "STOCK_ENTRY", batch.id, `Stock initial: ${validatedData.initialQuantity} ${product.unit}`);
+    }
 
     // Log activity
     const userId = await getCurrentUserId();
     await logProductCreate(userId || undefined, product.id, product.name, product.code);
 
     revalidatePath("/produits");
-    return { success: true, data: product };
+    revalidatePath("/inventaire");
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     console.error("Create product error:", error);
     if (error instanceof z.ZodError) {
@@ -159,7 +201,7 @@ export async function updateProduct(id: string, formData: FormData) {
 
     revalidatePath("/produits");
     revalidatePath(`/produits/${id}`);
-    return { success: true, data: product };
+    return { success: true, data: serializeProduct(product) };
   } catch (error) {
     console.error("Update product error:", error);
     if (error instanceof z.ZodError) {

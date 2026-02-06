@@ -12,7 +12,6 @@ datasource db {
 enum Category {
   MEDICAMENT
   VACCIN
-  INSULINE
   REACTIF
   CONSOMMABLE
   PETIT_MATERIEL
@@ -48,12 +47,15 @@ model User {
   email         String    @unique
   firstName     String?
   lastName      String?
+  role          String    @default("USER")
   isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   activities    ActivityLog[]
 
+  @@index([clerkId])
+  @@index([email])
   @@map("users")
 }
 
@@ -67,15 +69,18 @@ model Hospital {
   address           String?
   phone             String?
   email             String?
-  bedCapacity       Int?               @map("bed_capacity")
-  isActive          Boolean            @default(true) @map("is_active")
-  createdAt         DateTime           @default(now()) @map("created_at")
-  updatedAt         DateTime           @updatedAt @map("updated_at")
+  bedCapacity       Int?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   allocations       AnnualAllocation[]
   stockExits        StockExit[]
   deliveryNotes     DeliveryNote[]
 
+  @@index([code])
+  @@index([isActive])
+  @@index([type])
   @@map("hospitals")
 }
 
@@ -89,16 +94,20 @@ model Product {
   unit          String
   packaging     String?
   price         Decimal?      @db.Decimal(10, 2)
-  minStock      Int           @default(0) @map("min_stock")
-  isActive      Boolean       @default(true) @map("is_active")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  minStock      Int           @default(0)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   batches       Batch[]
   stockEntries  StockEntry[]
   stockExits    StockExit[]
   kitComponents KitComponent[]
 
+  @@index([code])
+  @@index([category])
+  @@index([isActive])
+  @@index([name])          // For search
   @@map("products")
 }
 
@@ -106,20 +115,24 @@ model Product {
 
 model Batch {
   id            String        @id @default(uuid())
-  batchNumber   String        @map("batch_number")
-  productId     String        @map("product_id")
+  batchNumber   String
+  productId     String
   product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity      Int
-  expiryDate    DateTime      @map("expiry_date")
+  expiryDate    DateTime
   temperature   String?
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   stockEntries  StockEntry[]
   stockExits    StockExit[]
   deliveryItems DeliveryNoteItem[]
 
   @@unique([batchNumber, productId])
+  @@index([productId])
+  @@index([expiryDate])      // CRITICAL: For expiry alerts
+  @@index([quantity])        // For stock availability
+  @@index([productId, expiryDate])  // Covering index for FEFO
   @@map("batches")
 }
 
@@ -127,17 +140,22 @@ model Batch {
 
 model StockEntry {
   id            String    @id @default(uuid())
-  productId     String    @map("product_id")
+  productId     String
   product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  batchId       String?   @map("batch_id")
+  batchId       String?
   batch         Batch?    @relation(fields: [batchId], references: [id], onDelete: SetNull)
   quantity      Int
-  referenceDoc  String?   @map("reference_doc")
+  referenceDoc  String?
   notes         String?
-  entryDate     DateTime  @default(now()) @map("entry_date")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  entryDate     DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
+  @@index([productId])
+  @@index([batchId])
+  @@index([entryDate])       // For date range queries
+  @@index([createdAt])
+  @@index([referenceDoc])    // For document lookup
   @@map("stock_entries")
 }
 
@@ -145,22 +163,29 @@ model StockEntry {
 
 model StockExit {
   id             String        @id @default(uuid())
-  productId      String        @map("product_id")
+  productId      String
   product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  batchId        String?       @map("batch_id")
+  batchId        String?
   batch          Batch?        @relation(fields: [batchId], references: [id], onDelete: SetNull)
-  hospitalId     String        @map("hospital_id")
+  hospitalId     String
   hospital       Hospital      @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
   quantity       Int
   quarter        Int
   year           Int
   notes          String?
-  exitDate       DateTime      @default(now()) @map("exit_date")
-  createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  exitDate       DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   deliveryNote   DeliveryNote? @relation(fields: [deliveryNoteId], references: [id])
-  deliveryNoteId String?       @map("delivery_note_id")
+  deliveryNoteId String?
 
+  @@index([productId])
+  @@index([hospitalId])
+  @@index([batchId])
+  @@index([exitDate])
+  @@index([year, quarter])        // For quarterly reports
+  @@index([deliveryNoteId])
+  @@index([createdAt])
   @@map("stock_exits")
 }
 
@@ -168,19 +193,23 @@ model StockExit {
 
 model AnnualAllocation {
   id          String    @id @default(uuid())
-  hospitalId  String    @map("hospital_id")
+  hospitalId  String
   hospital    Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
   category    Category
   year        Int
   budget      Decimal   @db.Decimal(12, 2)
-  q1Consumed  Decimal   @default(0) @db.Decimal(12, 2) @map("q1_consumed")
-  q2Consumed  Decimal   @default(0) @db.Decimal(12, 2) @map("q2_consumed")
-  q3Consumed  Decimal   @default(0) @db.Decimal(12, 2) @map("q3_consumed")
-  q4Consumed  Decimal   @default(0) @db.Decimal(12, 2) @map("q4_consumed")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  q1Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  q2Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  q3Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  q4Consumed  Decimal   @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@unique([hospitalId, category, year])
+  @@index([hospitalId])
+  @@index([year])
+  @@index([year, hospitalId])
+  @@index([category])
   @@map("annual_allocations")
 }
 
@@ -188,34 +217,42 @@ model AnnualAllocation {
 
 model DeliveryNote {
   id            String              @id @default(uuid())
-  noteNumber    String              @unique @map("note_number")
-  hospitalId    String              @map("hospital_id")
+  noteNumber    String              @unique
+  hospitalId    String
   hospital      Hospital            @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
   quarter       Int
   year          Int
   status        NoteStatus          @default(BROUILLON)
-  totalAmount   Decimal?            @db.Decimal(12, 2) @map("total_amount")
-  deliveredAt   DateTime?           @map("delivered_at")
-  createdAt     DateTime            @default(now()) @map("created_at")
-  updatedAt     DateTime            @updatedAt @map("updated_at")
+  totalAmount   Decimal?            @db.Decimal(12, 2)
+  deliveredAt   DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   items         DeliveryNoteItem[]
   stockExits    StockExit[]
 
+  @@index([noteNumber])
+  @@index([hospitalId])
+  @@index([year, quarter])
+  @@index([status])
+  @@index([createdAt])
+  @@index([deliveredAt])
   @@map("delivery_notes")
 }
 
 model DeliveryNoteItem {
   id              String        @id @default(uuid())
-  deliveryNoteId  String        @map("delivery_note_id")
+  deliveryNoteId  String
   deliveryNote    DeliveryNote  @relation(fields: [deliveryNoteId], references: [id], onDelete: Cascade)
-  batchId         String        @map("batch_id")
+  batchId         String
   batch           Batch         @relation(fields: [batchId], references: [id], onDelete: Cascade)
   quantity        Int
-  unitPrice       Decimal       @db.Decimal(10, 2) @map("unit_price")
-  totalPrice      Decimal       @db.Decimal(10, 2) @map("total_price")
-  createdAt       DateTime      @default(now()) @map("created_at")
+  unitPrice       Decimal       @db.Decimal(10, 2)
+  totalPrice      Decimal       @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now())
 
+  @@index([deliveryNoteId])
+  @@index([batchId])
   @@map("delivery_note_items")
 }
 
@@ -223,31 +260,37 @@ model DeliveryNoteItem {
 
 model BirthKit {
   id            String          @id @default(uuid())
-  kitNumber     String          @unique @map("kit_number")
-  kitType       String          @map("kit_type")
-  isComplete    Boolean         @default(false) @map("is_complete")
-  isDistributed Boolean         @default(false) @map("is_distributed")
-  distributedAt DateTime?       @map("distributed_at")
-  hospitalId    String?         @map("hospital_id")
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
+  kitNumber     String          @unique
+  kitType       String          // NORMAL or EPISIOTOMIE
+  isComplete    Boolean         @default(false)
+  isDistributed Boolean         @default(false)
+  distributedAt DateTime?
+  hospitalId    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   components    KitComponent[]
 
+  @@index([kitNumber])
+  @@index([isComplete])
+  @@index([isDistributed])
+  @@index([kitType])
   @@map("birth_kits")
 }
 
 model KitComponent {
   id          String    @id @default(uuid())
-  kitId       String    @map("kit_id")
+  kitId       String
   kit         BirthKit  @relation(fields: [kitId], references: [id], onDelete: Cascade)
-  productId   String    @map("product_id")
+  productId   String
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity    Int
-  isPresent   Boolean   @default(false) @map("is_present")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  isPresent   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
+  @@index([kitId])
+  @@index([productId])
   @@map("kit_components")
 }
 
@@ -255,15 +298,20 @@ model KitComponent {
 
 model ActivityLog {
   id          String      @id @default(uuid())
-  userId      String?     @map("user_id")
+  userId      String?
   user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   action      ActionType
-  entityType  String      @map("entity_type")
-  entityId    String?     @map("entity_id")
+  entityType  String      // e.g., "Product", "StockEntry", "DeliveryNote"
+  entityId    String?
   description String?
   metadata    String?     @db.Text
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([entityType, createdAt])  // For entity history
   @@map("activity_logs")
 }

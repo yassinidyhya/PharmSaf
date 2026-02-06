@@ -42,6 +42,7 @@ import { Category } from "@/lib/types";
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",
   VACCIN: "Vaccins",
+  INSULINE: "Insuline",
   REACTIF: "Réactifs",
   CONSOMMABLE: "Consommables",
   PETIT_MATERIEL: "Petit matériel",
@@ -51,6 +52,7 @@ const categoryLabels: Record<Category, string> = {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "bg-blue-100 text-blue-800",
   VACCIN: "bg-green-100 text-green-800",
+  INSULINE: "bg-red-100 text-red-800",
   REACTIF: "bg-purple-100 text-purple-800",
   CONSOMMABLE: "bg-orange-100 text-orange-800",
   PETIT_MATERIEL: "bg-gray-100 text-gray-800",

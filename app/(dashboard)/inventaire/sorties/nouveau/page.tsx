@@ -9,12 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { StockExitForm } from "@/components/forms/stock-exit-form";
+import { MultiStockExitForm } from "@/components/forms/multi-stock-exit-form";
 import { getProductsWithStock, getHospitals } from "../actions";
 
 export const metadata: Metadata = {
   title: "Nouvelle Sortie | Pharmacie Provinciale",
-  description: "Enregistrer une sortie de stock",
+  description: "Enregistrer une nouvelle sortie de stock",
 };
 
 export default async function NewStockExitPage() {
@@ -39,23 +39,13 @@ export default async function NewStockExitPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Nouvelle Sortie</h1>
           <p className="text-muted-foreground">
-            Enregistrer une sortie de stock vers un hôpital
+            Enregistrer une ou plusieurs sorties de stock vers un hôpital
           </p>
         </div>
       </div>
 
-      {/* Form Card */}
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Informations de la sortie</CardTitle>
-          <CardDescription>
-            Remplissez les informations de la nouvelle sortie de stock.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <StockExitForm products={products} hospitals={hospitals} />
-        </CardContent>
-      </Card>
+      {/* Form */}
+      <MultiStockExitForm products={products} hospitals={hospitals} />
     </div>
   );
 }

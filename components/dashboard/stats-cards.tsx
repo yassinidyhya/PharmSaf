@@ -59,12 +59,14 @@ export function StatsCards({ stats }: StatsCardsProps) {
       variant: "success",
     },
     {
-      title: "Périmant < 30j",
+      title: "Péremption",
       value: formatNumber(stats.criticalExpiryCount),
       href: "/inventaire/peremption",
-      subtitle: `${stats.criticalExpiryCount} lot${stats.criticalExpiryCount !== 1 ? 's' : ''}`,
+      subtitle: stats.criticalExpiryCount > 0 
+        ? `${stats.criticalExpiryCount} lot${stats.criticalExpiryCount !== 1 ? 's' : ''} < 30j`
+        : "Aucune alerte",
       alert: stats.criticalExpiryCount > 0,
-      variant: stats.criticalExpiryCount > 0 ? "danger" : "default",
+      variant: stats.criticalExpiryCount > 0 ? "warning" : "default",
     },
   ];
 

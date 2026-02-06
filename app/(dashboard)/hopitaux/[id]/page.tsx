@@ -44,6 +44,7 @@ const typeColors: Record<HospitalType, string> = {
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",
   VACCIN: "Vaccins",
+  INSULINE: "Insuline",
   REACTIF: "Réactifs",
   CONSOMMABLE: "Consommables",
   PETIT_MATERIEL: "Petit matériel",

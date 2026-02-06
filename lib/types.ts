@@ -5,6 +5,7 @@
 export const CategoryEnum = {
   MEDICAMENT: "MEDICAMENT",
   VACCIN: "VACCIN",
+  INSULINE: "INSULINE",
   REACTIF: "REACTIF",
   CONSOMMABLE: "CONSOMMABLE",
   PETIT_MATERIEL: "PETIT_MATERIEL",
@@ -95,6 +96,7 @@ export interface User {
 export const CategoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",
   VACCIN: "Vaccins",
+  INSULINE: "Insuline",
   REACTIF: "Réactifs",
   CONSOMMABLE: "Consommables",
   PETIT_MATERIEL: "Petit Matériel",

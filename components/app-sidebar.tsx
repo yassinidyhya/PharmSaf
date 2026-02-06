@@ -6,14 +6,14 @@ import {
   IconDashboard,
   IconPackage,
   IconPackageExport,
-  IconPackageImport,
   IconPill,
   IconReport,
   IconSettings,
   IconTruckDelivery,
   IconUpload,
-  IconUsers,
   IconBabyCarriage,
+  IconHeartRateMonitor,
+  IconVaccine,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -38,17 +38,27 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Inventaire",
+      title: "Stock",
       url: "/inventaire",
       icon: IconPackage,
     },
     {
-      title: "Produits",
+      title: "Médicaments et DM",
       url: "/produits",
       icon: IconPill,
     },
     {
-      title: "Hôpitaux",
+      title: "Insuline",
+      url: "/produits?category=INSULINE",
+      icon: IconVaccine,
+    },
+    {
+      title: "Kit d'accouchement",
+      url: "/kits",
+      icon: IconBabyCarriage,
+    },
+    {
+      title: "Centres de santé",
       url: "/hopitaux",
       icon: IconBuildingHospital,
     },
@@ -73,11 +83,6 @@ const data = {
       title: "Import",
       url: "/import",
       icon: IconUpload,
-    },
-    {
-      title: "Kits Naissance",
-      url: "/kits",
-      icon: IconBabyCarriage,
     },
   ],
   navSecondary: [

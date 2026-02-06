@@ -430,7 +430,7 @@ export async function getCriticalAlerts(
       );
 
       alerts.push({
-        type: batch.product.category === "VACCIN" ? "INSULIN_EXPIRY" : "EXPIRY",
+        type: batch.product.category === "INSULINE" ? "INSULIN_EXPIRY" : "EXPIRY",
         severity: daysUntilExpiry <= 7 ? "CRITICAL" : "WARNING",
         productId: batch.product.id,
         productName: batch.product.name,

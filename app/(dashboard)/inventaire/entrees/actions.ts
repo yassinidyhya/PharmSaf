@@ -147,47 +147,53 @@ export async function createStockEntry(formData: FormData) {
       quantity: parseInt(rawData.quantity as string),
     });
 
-    // Create or find batch
-    const batch = await prisma.batch.upsert({
-      where: {
-        batchNumber_productId: {
+    // Execute batch upsert and stock entry creation in a transaction
+    // to ensure atomicity - both succeed or both fail
+    const result = await prisma.$transaction(async (tx) => {
+      // Create or find batch
+      const batch = await tx.batch.upsert({
+        where: {
+          batchNumber_productId: {
+            batchNumber: validatedData.batchNumber,
+            productId: validatedData.productId,
+          },
+        },
+        update: {
+          quantity: {
+            increment: validatedData.quantity,
+          },
+          expiryDate: new Date(validatedData.expiryDate),
+          temperature: validatedData.temperature || null,
+        },
+        create: {
           batchNumber: validatedData.batchNumber,
           productId: validatedData.productId,
+          quantity: validatedData.quantity,
+          expiryDate: new Date(validatedData.expiryDate),
+          temperature: validatedData.temperature || null,
         },
-      },
-      update: {
-        quantity: {
-          increment: validatedData.quantity,
+      });
+
+      // Create stock entry with explicit entry date
+      const entryDate = validatedData.entryDate 
+        ? new Date(validatedData.entryDate) 
+        : new Date();
+
+      const entry = await tx.stockEntry.create({
+        data: {
+          productId: validatedData.productId,
+          batchId: batch.id,
+          quantity: validatedData.quantity,
+          referenceDoc: validatedData.referenceDoc || null,
+          notes: validatedData.notes || null,
+          entryDate,
         },
-        expiryDate: new Date(validatedData.expiryDate),
-        temperature: validatedData.temperature || null,
-      },
-      create: {
-        batchNumber: validatedData.batchNumber,
-        productId: validatedData.productId,
-        quantity: validatedData.quantity,
-        expiryDate: new Date(validatedData.expiryDate),
-        temperature: validatedData.temperature || null,
-      },
+      });
+
+      return { batch, entry };
     });
 
-    // Create stock entry with explicit entry date
-    const entryDate = validatedData.entryDate 
-      ? new Date(validatedData.entryDate) 
-      : new Date();
-
-    const entry = await prisma.stockEntry.create({
-      data: {
-        productId: validatedData.productId,
-        batchId: batch.id,
-        quantity: validatedData.quantity,
-        referenceDoc: validatedData.referenceDoc || null,
-        notes: validatedData.notes || null,
-        entryDate,
-      },
-    });
-
-    // Log activity
+    // Log activity (outside transaction - non-critical)
     const product = await prisma.product.findUnique({
       where: { id: validatedData.productId },
       select: { name: true },
@@ -196,7 +202,7 @@ export async function createStockEntry(formData: FormData) {
     if (userId) {
       await logStockEntryCreate(
         userId,
-        entry.id,
+        result.entry.id,
         product?.name || "Produit inconnu",
         validatedData.quantity,
         validatedData.batchNumber
@@ -205,7 +211,7 @@ export async function createStockEntry(formData: FormData) {
 
     revalidatePath("/inventaire");
     revalidatePath("/inventaire/entrees");
-    return { success: true, data: entry };
+    return { success: true, data: result.entry };
   } catch (error) {
     console.error("Create stock entry error:", error);
     if (error instanceof z.ZodError) {
@@ -284,6 +290,7 @@ export async function exportStockEntriesToExcel(
     const categoryLabels: Record<string, string> = {
       MEDICAMENT: "Médicaments",
       VACCIN: "Vaccins",
+      INSULINE: "Insuline",
       REACTIF: "Réactifs",
       CONSOMMABLE: "Consommables",
       PETIT_MATERIEL: "Petit matériel",

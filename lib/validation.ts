@@ -11,6 +11,10 @@ export const createProductSchema = z.object({
   packaging: z.string().optional(),
   price: z.coerce.number().min(0, "Le prix doit être positif").optional(),
   minStock: z.coerce.number().min(0, "Le stock minimum doit être positif").default(0),
+  // Optional initial stock fields
+  initialQuantity: z.coerce.number().min(0).optional(),
+  batchNumber: z.string().optional(),
+  expiryDate: z.string().optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial();

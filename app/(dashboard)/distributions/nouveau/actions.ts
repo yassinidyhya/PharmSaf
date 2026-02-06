@@ -122,11 +122,12 @@ export async function getProductsWithStockAndPrice() {
       },
     });
 
-    // Filter products with available stock
+    // Filter products with available stock and serialize Decimal
     const productsWithStock = products
       .filter((p) => p.batches.reduce((sum, b) => sum + b.quantity, 0) > 0)
       .map((p) => ({
         ...p,
+        price: p.price ? Number(p.price) : null,
         totalStock: p.batches.reduce((sum, b) => sum + b.quantity, 0),
       }));
 

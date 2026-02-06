@@ -29,6 +29,7 @@ import { toast } from "sonner";
 const categoryLabels: Record<string, string> = {
   MEDICAMENT: "Médicament",
   VACCIN: "Vaccin",
+  INSULINE: "Insuline",
   REACTIF: "Réactif",
   CONSOMMABLE: "Consommable",
   PETIT_MATERIEL: "Petit matériel",

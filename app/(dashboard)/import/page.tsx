@@ -70,6 +70,7 @@ const importTypes = [
 const categoryExamples = `Exemples de catégories valides:
 - MEDICAMENT (ou Médicaments, MED)
 - VACCIN (ou Vaccins)
+- INSULINE
 - REACTIF (ou Réactifs)
 - CONSOMMABLE (ou Consommables)
 - PETIT_MATERIEL

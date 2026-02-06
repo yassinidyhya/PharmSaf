@@ -28,9 +28,11 @@ interface ExpiryAlertCardProps {
 }
 
 function getUrgencyLevel(days: number) {
-  if (days <= 30) return { level: "critical", label: "Critique", color: "bg-red-100 text-red-800 border-red-200" };
-  if (days <= 60) return { level: "warning", label: "Attention", color: "bg-orange-100 text-orange-800 border-orange-200" };
-  return { level: "notice", label: "Surveillance", color: "bg-yellow-100 text-yellow-800 border-yellow-200" };
+  if (days <= 0) return { level: "expired", label: "Périmé", color: "bg-gradient-to-r from-rose-500 to-red-500 text-white border-rose-400 shadow-sm" };
+  if (days <= 7) return { level: "critical", label: "Urgent", color: "bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-400 shadow-sm" };
+  if (days <= 30) return { level: "warning", label: "Attention", color: "bg-gradient-to-r from-amber-400 to-yellow-400 text-amber-950 border-amber-300" };
+  if (days <= 60) return { level: "notice", label: "Prévention", color: "bg-gradient-to-r from-sky-400 to-blue-400 text-white border-sky-300" };
+  return { level: "ok", label: "Surveillance", color: "bg-gradient-to-r from-emerald-400 to-teal-400 text-white border-emerald-300" };
 }
 
 export function ExpiryAlertCard({ batches, maxDisplay = 5 }: ExpiryAlertCardProps) {
@@ -38,7 +40,7 @@ export function ExpiryAlertCard({ batches, maxDisplay = 5 }: ExpiryAlertCardProp
   const warningCount = batches.filter((b) => b.daysUntilExpiry > 30 && b.daysUntilExpiry <= 60).length;
 
   return (
-    <Card className={cn(criticalCount > 0 && "border-red-200")}>
+    <Card className={cn("border-border/50", batches.some(b => b.daysUntilExpiry <= 0) && "border-rose-300")}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
@@ -51,14 +53,19 @@ export function ExpiryAlertCard({ batches, maxDisplay = 5 }: ExpiryAlertCardProp
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            {criticalCount > 0 && (
-              <Badge variant="destructive" className="h-6">
-                {criticalCount} critique
+            {batches.filter(b => b.daysUntilExpiry <= 0).length > 0 && (
+              <Badge variant="destructive" className="h-6 bg-rose-500">
+                {batches.filter(b => b.daysUntilExpiry <= 0).length} périmé
               </Badge>
             )}
-            {warningCount > 0 && (
-              <Badge variant="default" className="h-6 bg-orange-500">
-                {warningCount} attention
+            {batches.filter(b => b.daysUntilExpiry > 0 && b.daysUntilExpiry <= 7).length > 0 && (
+              <Badge className="h-6 bg-orange-500">
+                {batches.filter(b => b.daysUntilExpiry > 0 && b.daysUntilExpiry <= 7).length} urgent
+              </Badge>
+            )}
+            {batches.filter(b => b.daysUntilExpiry > 7 && b.daysUntilExpiry <= 30).length > 0 && (
+              <Badge className="h-6 bg-amber-500">
+                {batches.filter(b => b.daysUntilExpiry > 7 && b.daysUntilExpiry <= 30).length} attention
               </Badge>
             )}
           </div>
@@ -93,10 +100,13 @@ export function ExpiryAlertCard({ batches, maxDisplay = 5 }: ExpiryAlertCardProp
                   <div className="text-right ml-4">
                     <p className={cn(
                       "text-sm font-semibold",
-                      urgency.level === "critical" && "text-red-600",
-                      urgency.level === "warning" && "text-orange-600"
+                      urgency.level === "expired" && "text-rose-600",
+                      urgency.level === "critical" && "text-orange-600",
+                      urgency.level === "warning" && "text-amber-600",
+                      urgency.level === "notice" && "text-blue-600",
+                      urgency.level === "ok" && "text-emerald-600"
                     )}>
-                      {batch.daysUntilExpiry}j
+                      {batch.daysUntilExpiry <= 0 ? `${Math.abs(batch.daysUntilExpiry)}j` : `${batch.daysUntilExpiry}j`}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(batch.expiryDate)}

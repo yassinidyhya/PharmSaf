@@ -1,52 +1,32 @@
-import { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ProductForm } from "@/components/forms/product-form";
-
-export const metadata: Metadata = {
-  title: "Nouveau Produit | Pharmacie Provinciale",
-  description: "Ajouter un nouveau produit au catalogue",
-};
 
 export default function NewProductPage() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6">
+    <div className="flex flex-1 flex-col">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/produits">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Retour</span>
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Nouveau Produit</h1>
-          <p className="text-muted-foreground">
-            Ajouter un nouveau produit au catalogue
-          </p>
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="h-9 w-9 -ml-2" asChild>
+            <Link href="/produits">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-lg font-semibold">Nouveau Produit</h1>
+            <p className="text-xs text-muted-foreground">Ajouter au catalogue</p>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Form Card */}
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Informations du produit</CardTitle>
-          <CardDescription>
-            Remplissez les informations ci-dessous pour créer un nouveau produit.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProductForm />
-        </CardContent>
-      </Card>
+      {/* Form */}
+      <main className="flex-1 p-4">
+        <ProductForm />
+      </main>
     </div>
   );
 }
