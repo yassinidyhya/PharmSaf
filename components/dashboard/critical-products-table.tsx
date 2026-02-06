@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { ColumnDef } from "@tanstack/react-table"
-import { Category } from "@prisma/client"
+import { Category } from "@/lib/types";
 import { IconAlertTriangle, IconPackageOff, IconClock, IconDotsVertical, IconEye, IconShoppingCart, IconTruckDelivery, IconCheck, IconAlertCircle } from "@tabler/icons-react"
 
 import { DataTable } from "@/components/ui/data-table"

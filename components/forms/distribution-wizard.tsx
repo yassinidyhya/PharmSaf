@@ -40,7 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils";
-import { Category } from "@prisma/client";
+import { Category, CategoryLabels } from "@/lib/types";
 import {
   getHospitalsWithBudget,
   getProductsWithStockAndPrice,
@@ -48,14 +48,7 @@ import {
   createDistribution,
 } from "@/app/(dashboard)/distributions/nouveau/actions";
 
-const categoryLabels: Record<Category, string> = {
-  MEDICAMENT: "Médicaments",
-  VACCIN: "Vaccins",
-  REACTIF: "Réactifs",
-  CONSOMMABLE: "Consommables",
-  PETIT_MATERIEL: "Petit matériel",
-  MATERIEL_BUREAU: "Matériel de bureau",
-};
+const categoryLabels = CategoryLabels;
 
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "bg-blue-100 text-blue-800",

@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Category } from "@prisma/client";
+import { Category } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 

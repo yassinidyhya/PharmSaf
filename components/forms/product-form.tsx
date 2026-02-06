@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Category } from "@prisma/client";
+import { Category, CategoryLabels } from "@/lib/types";
 import { createProduct } from "@/app/(dashboard)/produits/actions";
 import { createProductSchema, CreateProductInput } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
@@ -25,14 +25,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-const categoryLabels: Record<Category, string> = {
-  MEDICAMENT: "Médicament",
-  VACCIN: "Vaccin",
-  REACTIF: "Réactif",
-  CONSOMMABLE: "Consommable",
-  PETIT_MATERIEL: "Petit matériel",
-  MATERIEL_BUREAU: "Matériel de bureau",
-};
+const categoryLabels = CategoryLabels;
 
 export function ProductForm() {
   const [isPending, setIsPending] = useState(false);

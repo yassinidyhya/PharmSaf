@@ -46,7 +46,7 @@ import {
 } from "./actions";
 import { AllocationForm } from "@/components/forms/allocation-form";
 import { formatCurrency } from "@/lib/utils";
-import { Category } from "@prisma/client";
+import { Category } from "@/lib/types";
 
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",

@@ -25,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getHospital } from "../actions";
 import { HospitalForm } from "@/components/forms/hospital-form";
 import { formatDate, formatNumber, formatCurrency } from "@/lib/utils";
-import { HospitalType, Category } from "@prisma/client";
+import { HospitalType, Category, HospitalTypeLabels } from "@/lib/types";
 
 interface HospitalDetailPageProps {
   params: Promise<{
@@ -33,11 +33,7 @@ interface HospitalDetailPageProps {
   }>;
 }
 
-const typeLabels: Record<HospitalType, string> = {
-  CENTRE_HOSPITALIER: "Centre Hospitalier",
-  CENTRE_SANTE: "Centre de Santé",
-  HOPITAL_PROVINCIAL: "Hôpital Provincial",
-};
+const typeLabels = HospitalTypeLabels;
 
 const typeColors: Record<HospitalType, string> = {
   CENTRE_HOSPITALIER: "bg-blue-100 text-blue-800",
@@ -53,6 +49,8 @@ const categoryLabels: Record<Category, string> = {
   PETIT_MATERIEL: "Petit matériel",
   MATERIEL_BUREAU: "Matériel de bureau",
 };
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

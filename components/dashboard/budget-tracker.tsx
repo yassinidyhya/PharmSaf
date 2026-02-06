@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Category } from "@prisma/client"
+import { Category } from "@/lib/types";
 import { IconAlertTriangle, IconChevronDown, IconCoins, IconArrowRight, IconBuildingHospital } from "@tabler/icons-react"
 import { RippleButton } from "@/components/ui/ripple-button"
 

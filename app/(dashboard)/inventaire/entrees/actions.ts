@@ -228,7 +228,13 @@ export async function getProductsForEntry() {
       orderBy: { name: "asc" },
     });
 
-    return { success: true, data: products };
+    // Serialize Decimal to number for client components
+    const serializedProducts = products.map(p => ({
+      ...p,
+      price: p.price ? Number(p.price) : null,
+    }));
+
+    return { success: true, data: serializedProducts };
   } catch (error) {
     console.error("Get products error:", error);
     return {

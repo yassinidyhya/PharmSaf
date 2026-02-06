@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getProduct } from "../actions";
 import { ProductEditForm } from "@/components/forms/product-edit-form";
 import { formatDate, formatCurrency, formatNumber } from "@/lib/utils";
-import { Category } from "@prisma/client";
+import { Category, CategoryLabels } from "@/lib/types";
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -23,14 +23,7 @@ interface ProductDetailPageProps {
   }>;
 }
 
-const categoryLabels: Record<Category, string> = {
-  MEDICAMENT: "Médicament",
-  VACCIN: "Vaccin",
-  REACTIF: "Réactif",
-  CONSOMMABLE: "Consommable",
-  PETIT_MATERIEL: "Petit matériel",
-  MATERIEL_BUREAU: "Matériel de bureau",
-};
+const categoryLabels = CategoryLabels;
 
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "bg-blue-100 text-blue-800",
@@ -41,12 +34,14 @@ const categoryColors: Record<Category, string> = {
   MATERIEL_BUREAU: "bg-slate-100 text-slate-800",
 };
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: ProductDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const result = await getProduct(id);
-  
+
   if (!result.success || !result.data) {
     return {
       title: "Produit non trouvé | Pharmacie Provinciale",
@@ -68,7 +63,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   }
 
   const product = result.data;
-  const totalStock = product.batches.reduce((sum, batch) => sum + batch.quantity, 0);
+  const totalStock = product.batches.reduce((sum: number, batch: any) => sum + batch.quantity, 0);
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6">
@@ -83,8 +78,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight">{product.name}</h1>
-            <Badge variant="outline" className={categoryColors[product.category]}>
-              {categoryLabels[product.category]}
+            <Badge variant="outline" className={categoryColors[product.category as Category]}>
+              {categoryLabels[product.category as Category]}
             </Badge>
           </div>
           <p className="text-muted-foreground">
@@ -179,7 +174,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {product.batches.map((batch) => (
+                  {product.batches.map((batch: any) => (
                     <div
                       key={batch.id}
                       className="flex items-center justify-between p-3 border rounded-lg"
@@ -224,7 +219,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <div>
                     <h4 className="text-sm font-semibold mb-2">Dernières entrées</h4>
                     <div className="space-y-2">
-                      {product.stockEntries.slice(0, 5).map((entry) => (
+                      {product.stockEntries.slice(0, 5).map((entry: any) => (
                         <div
                           key={entry.id}
                           className="flex items-center justify-between p-3 border rounded-lg"
@@ -252,7 +247,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   <div>
                     <h4 className="text-sm font-semibold mb-2">Dernières sorties</h4>
                     <div className="space-y-2">
-                      {product.stockExits.slice(0, 5).map((exit) => (
+                      {product.stockExits.slice(0, 5).map((exit: any) => (
                         <div
                           key={exit.id}
                           className="flex items-center justify-between p-3 border rounded-lg"

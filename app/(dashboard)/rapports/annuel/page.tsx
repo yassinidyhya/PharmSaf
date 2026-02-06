@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { getAnnualReportData } from "../actions";
 import { exportAnnualReport } from "@/lib/excel-export";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { Category } from "@prisma/client";
+import { Category } from "@/lib/types";
 
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",

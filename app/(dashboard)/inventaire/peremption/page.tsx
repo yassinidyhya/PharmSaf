@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { getExpiringProducts, ExpiryFilters } from "./actions";
 import { formatDate, formatNumber } from "@/lib/utils";
-import { Category } from "@prisma/client";
+import { Category } from "@/lib/types";
 
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicament",

@@ -9,7 +9,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Product, Category } from "@prisma/client";
+import { Product, Category } from "@/lib/types";
 import {
   Table,
   TableBody,

@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { Product, Batch, Hospital, HospitalType } from "@prisma/client";
+import { Product, Batch, Hospital, HospitalType, HospitalTypeLabels } from "@/lib/types";
 import { createStockExit } from "@/app/(dashboard)/inventaire/sorties/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,11 +47,7 @@ interface ProductWithBatches extends Product {
   batches: Batch[];
 }
 
-const hospitalTypeLabels: Record<HospitalType, string> = {
-  CENTRE_HOSPITALIER: "Centre Hospitalier",
-  CENTRE_SANTE: "Centre de Santé",
-  HOPITAL_PROVINCIAL: "Hôpital Provincial",
-};
+const hospitalTypeLabels = HospitalTypeLabels;
 
 interface StockExitFormProps {
   products: ProductWithBatches[];

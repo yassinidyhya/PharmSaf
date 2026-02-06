@@ -34,7 +34,7 @@ import {
   Printer,
 } from "lucide-react";
 import { formatDate, formatNumber } from "@/lib/utils";
-import { Category } from "@prisma/client";
+import { Category } from "@/lib/types";
 import { toast } from "sonner";
 import {
   DropdownMenu,

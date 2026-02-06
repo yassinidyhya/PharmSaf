@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Category } from "@prisma/client";
+import { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface CoverageItem {

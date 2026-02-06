@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { Hospital, HospitalType } from "@prisma/client";
+import { Hospital, HospitalType, HospitalTypeEnum, HospitalTypeLabels } from "@/lib/types";
 import { createHospital, updateHospital } from "@/app/(dashboard)/hopitaux/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,7 @@ import { toast } from "sonner";
 const hospitalSchema = z.object({
   code: z.string().min(1, "Le code est requis"),
   name: z.string().min(1, "Le nom est requis"),
-  type: z.nativeEnum(HospitalType, {
+  type: z.nativeEnum(HospitalTypeEnum, {
     message: "Le type est requis",
   }),
   address: z.string().optional(),
@@ -39,11 +39,7 @@ const hospitalSchema = z.object({
 
 type HospitalInput = z.infer<typeof hospitalSchema>;
 
-const typeLabels: Record<HospitalType, string> = {
-  CENTRE_HOSPITALIER: "Centre Hospitalier",
-  CENTRE_SANTE: "Centre de Santé",
-  HOPITAL_PROVINCIAL: "Hôpital Provincial",
-};
+const typeLabels = HospitalTypeLabels;
 
 interface HospitalFormProps {
   hospital?: Hospital;

@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Use standalone output for Hostinger deployment
+  output: "standalone",
 };
 
 export default nextConfig;

@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { Product, Category } from "@prisma/client";
+import { Product, Category, CategoryLabels } from "@/lib/types";
 import { createStockEntry } from "@/app/(dashboard)/inventaire/entrees/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,14 +40,7 @@ const stockEntrySchema = z.object({
 
 type StockEntryInput = z.infer<typeof stockEntrySchema>;
 
-const categoryLabels: Record<Category, string> = {
-  MEDICAMENT: "Médicament",
-  VACCIN: "Vaccin",
-  REACTIF: "Réactif",
-  CONSOMMABLE: "Consommable",
-  PETIT_MATERIEL: "Petit matériel",
-  MATERIEL_BUREAU: "Matériel de bureau",
-};
+const categoryLabels = CategoryLabels;
 
 interface StockEntryFormProps {
   products: Product[];

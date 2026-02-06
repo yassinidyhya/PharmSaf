@@ -258,6 +258,14 @@ export async function createStockExit(formData: FormData) {
   }
 }
 
+// Helper to serialize Decimal to number
+function serializeProduct(product: any) {
+  return {
+    ...product,
+    price: product.price ? Number(product.price) : null,
+  };
+}
+
 export async function getProductsWithStock() {
   try {
     const products = await prisma.product.findMany({
@@ -280,7 +288,10 @@ export async function getProductsWithStock() {
       (p) => p.batches.reduce((sum, b) => sum + b.quantity, 0) > 0
     );
 
-    return { success: true, data: productsWithStock };
+    // Serialize Decimal to number
+    const serializedProducts = productsWithStock.map(serializeProduct);
+
+    return { success: true, data: serializedProducts };
   } catch (error) {
     console.error("Get products error:", error);
     return {
@@ -308,11 +319,11 @@ export async function getProductsWithFEFO() {
       (p) => p.batches.reduce((sum, b) => sum + b.quantity, 0) > 0
     );
 
-    // Add FEFO recommendation for each product
+    // Add FEFO recommendation for each product and serialize Decimal
     const productsWithFEFO = productsWithStock.map((product) => {
       const oldestBatch = product.batches[0]; // Already sorted by expiryDate asc
       return {
-        ...product,
+        ...serializeProduct(product),
         recommendedBatch: oldestBatch,
         isFEFOCompliant: true,
       };

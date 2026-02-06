@@ -57,7 +57,7 @@ import {
   getExpiringBatches,
 } from "./actions"
 import { formatNumber, formatCurrency, cn } from "@/lib/utils"
-import { Category } from "@prisma/client"
+import { Category } from "@/lib/types";
 import { isToday, isYesterday } from "date-fns"
 
 interface DateRange {

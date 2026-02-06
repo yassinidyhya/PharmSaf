@@ -42,7 +42,7 @@ import {
   getFiltersData,
   DeliveryNoteFilters,
 } from "./actions";
-import { NoteStatus } from "@prisma/client";
+import { NoteStatus } from "@/lib/types";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
 const statusLabels: Record<string, string> = {

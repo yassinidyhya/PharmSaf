@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Category } from "@prisma/client";
+import { Category, CategoryEnum, CategoryLabels } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 
 const allocationSchema = z.object({
-  category: z.nativeEnum(Category, {
+  category: z.nativeEnum(CategoryEnum, {
     message: "La catégorie est requise",
   }),
   year: z.coerce.number().min(2020).max(2100),
@@ -36,14 +36,7 @@ const updateAllocationSchema = z.object({
 type AllocationInput = z.infer<typeof allocationSchema>;
 type UpdateAllocationInput = z.infer<typeof updateAllocationSchema>;
 
-const categoryLabels: Record<Category, string> = {
-  MEDICAMENT: "Médicaments",
-  VACCIN: "Vaccins",
-  REACTIF: "Réactifs",
-  CONSOMMABLE: "Consommables",
-  PETIT_MATERIEL: "Petit matériel",
-  MATERIEL_BUREAU: "Matériel de bureau",
-};
+const categoryLabels = CategoryLabels;
 
 interface Allocation {
   id: string;

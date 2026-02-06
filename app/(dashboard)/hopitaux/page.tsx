@@ -19,18 +19,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getHospitals } from "./actions";
-import { HospitalType } from "@prisma/client";
+import { HospitalType, HospitalTypeLabels } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Hôpitaux | Pharmacie Provinciale",
   description: "Liste des hôpitaux et centres de santé",
 };
 
-const typeLabels: Record<HospitalType, string> = {
-  CENTRE_HOSPITALIER: "Centre Hospitalier",
-  CENTRE_SANTE: "Centre de Santé",
-  HOPITAL_PROVINCIAL: "Hôpital Provincial",
-};
+const typeLabels = HospitalTypeLabels;
 
 const typeColors: Record<HospitalType, string> = {
   CENTRE_HOSPITALIER: "bg-blue-100 text-blue-800",

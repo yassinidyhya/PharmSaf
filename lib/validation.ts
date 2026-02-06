@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { Category } from "@prisma/client";
+import { CategoryEnum } from "@/lib/types";
 
 export const createProductSchema = z.object({
   code: z.string().min(1, "Le code est requis"),
   name: z.string().min(1, "Le nom est requis"),
-  category: z.nativeEnum(Category, {
+  category: z.nativeEnum(CategoryEnum, {
     message: "La catégorie est requise",
   }),
   unit: z.string().min(1, "L'unité est requise"),

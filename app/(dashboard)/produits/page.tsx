@@ -14,6 +14,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Produits | Pharmacie Provinciale",
   description: "Catalogue des produits pharmaceutiques",

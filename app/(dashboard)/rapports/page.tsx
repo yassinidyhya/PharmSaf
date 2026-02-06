@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { getReportStats } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Rapports | Pharmacie Provinciale",
   description: "Rapports et analyses",

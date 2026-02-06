@@ -48,6 +48,14 @@ export async function createProduct(formData: FormData) {
   }
 }
 
+// Helper to serialize Decimal to number
+function serializeProduct(product: any) {
+  return {
+    ...product,
+    price: product.price ? Number(product.price) : null,
+  };
+}
+
 export async function getProducts(filters?: ProductFilters) {
   const where = {
     isActive: filters?.isActive ?? true,
@@ -77,7 +85,10 @@ export async function getProducts(filters?: ProductFilters) {
     prisma.product.count({ where }),
   ]);
 
-  return { products, total };
+  // Serialize Decimal to number
+  const serializedProducts = products.map(serializeProduct);
+
+  return { products: serializedProducts, total };
 }
 
 export async function getProduct(id: string) {
@@ -115,7 +126,10 @@ export async function getProduct(id: string) {
       return { success: false, error: "Produit non trouvé" };
     }
 
-    return { success: true, data: product };
+    // Serialize Decimal to number
+    const serializedProduct = serializeProduct(product);
+
+    return { success: true, data: serializedProduct };
   } catch (error) {
     console.error("Get product error:", error);
     return {

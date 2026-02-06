@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Product, Category } from "@prisma/client";
+import { Product, Category, CategoryLabels } from "@/lib/types";
 import { updateProduct } from "@/app/(dashboard)/produits/actions";
 import { updateProductSchema, UpdateProductInput } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
@@ -25,14 +25,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-const categoryLabels: Record<Category, string> = {
-  MEDICAMENT: "Médicament",
-  VACCIN: "Vaccin",
-  REACTIF: "Réactif",
-  CONSOMMABLE: "Consommable",
-  PETIT_MATERIEL: "Petit matériel",
-  MATERIEL_BUREAU: "Matériel de bureau",
-};
+const categoryLabels = CategoryLabels;
 
 interface ProductEditFormProps {
   product: Product;
