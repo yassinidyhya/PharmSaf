@@ -76,7 +76,7 @@ export async function getQuarterlyReportData(year: number, quarter: number) {
 
     // Calculate totals by category
     const byCategory: Record<string, { count: number; quantity: number; value: number }> = {};
-    const byHospital: Record<string, { count: number; quantity: number; value: number }> = {};
+    const byHospital: Record<string, { count: number; quantity: number; value: number; name: string }> = {};
 
     distributions.forEach((dist) => {
       const category = dist.product.category;

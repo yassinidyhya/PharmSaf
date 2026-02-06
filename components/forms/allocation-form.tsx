@@ -23,7 +23,7 @@ import {
 
 const allocationSchema = z.object({
   category: z.nativeEnum(Category, {
-    errorMap: () => ({ message: "La catégorie est requise" }),
+    message: "La catégorie est requise",
   }),
   year: z.coerce.number().min(2020).max(2100),
   budget: z.coerce.number().min(0, "Le budget doit être positif"),
@@ -34,6 +34,7 @@ const updateAllocationSchema = z.object({
 });
 
 type AllocationInput = z.infer<typeof allocationSchema>;
+type UpdateAllocationInput = z.infer<typeof updateAllocationSchema>;
 
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",
@@ -68,7 +69,7 @@ export function AllocationForm({ allocation, onSubmit }: AllocationFormProps) {
   const currentYear = new Date().getFullYear();
 
   const form = useForm<AllocationInput>({
-    resolver: zodResolver(isEditing ? updateAllocationSchema : allocationSchema),
+    resolver: zodResolver(isEditing ? updateAllocationSchema : allocationSchema) as any,
     defaultValues: {
       category: allocation?.category || undefined,
       year: allocation?.year || currentYear,

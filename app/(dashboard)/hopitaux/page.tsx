@@ -40,7 +40,7 @@ const typeColors: Record<HospitalType, string> = {
 
 export default async function HospitalsPage() {
   const result = await getHospitals();
-  const hospitals = result.success ? result.data : [];
+  const hospitals = result.success ? result.data ?? [] : [];
   const total = result.success ? result.total : 0;
 
   return (
@@ -114,8 +114,8 @@ export default async function HospitalsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={typeColors[hospital.type]}>
-                          {typeLabels[hospital.type]}
+                        <Badge variant="outline" className={typeColors[hospital.type as HospitalType]}>
+                          {typeLabels[hospital.type as HospitalType]}
                         </Badge>
                       </TableCell>
                       <TableCell>

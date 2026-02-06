@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Category } from "@prisma/client";
 import { logAllocationCreate } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
 
 const createAllocationSchema = z.object({
   category: z.nativeEnum(Category, {
@@ -77,7 +77,7 @@ export async function createAllocation(hospitalId: string, formData: FormData) {
       where: { id: hospitalId },
       select: { name: true },
     });
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logAllocationCreate(
       userId || undefined,
       allocation.id,

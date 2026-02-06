@@ -5,13 +5,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { HospitalType } from "@prisma/client";
 import { logHospitalCreate } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
 
 const createHospitalSchema = z.object({
   code: z.string().min(1, "Le code est requis"),
   name: z.string().min(1, "Le nom est requis"),
   type: z.nativeEnum(HospitalType, {
-    errorMap: () => ({ message: "Le type est requis" }),
+    message: "Le type est requis",
   }),
   address: z.string().optional(),
   phone: z.string().optional(),
@@ -121,7 +121,7 @@ export async function createHospital(formData: FormData) {
     });
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logHospitalCreate(userId || undefined, hospital.id, hospital.name, hospital.code);
 
     revalidatePath("/hopitaux");
@@ -131,7 +131,7 @@ export async function createHospital(formData: FormData) {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map((e) => e.message).join(", "),
+        error: error.issues.map((e) => e.message).join(", "),
       };
     }
     return {
@@ -164,7 +164,7 @@ export async function updateHospital(id: string, formData: FormData) {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map((e) => e.message).join(", "),
+        error: error.issues.map((e) => e.message).join(", "),
       };
     }
     return {

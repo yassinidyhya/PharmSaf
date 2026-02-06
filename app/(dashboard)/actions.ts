@@ -86,20 +86,28 @@ export interface CategoryStat {
 /**
  * Get main dashboard KPI stats
  */
-export async function getDashboardStats(): Promise<{
+export async function getDashboardStats(
+  fromDate?: Date,
+  toDate?: Date
+): Promise<{
   success: boolean;
   data?: DashboardStats;
   error?: string;
 }> {
   try {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setDate(1); // Start of current month
+    }
+    startDate.setHours(0, 0, 0, 0);
 
-    const currentQuarter = Math.floor((new Date().getMonth() / 3)) + 1;
-    const currentYear = new Date().getFullYear();
+    const currentQuarter = Math.floor((endDate.getMonth() / 3)) + 1;
+    const currentYear = endDate.getFullYear();
 
-    const [products, lowStockBatches, criticalExpiry, newProducts, hospitals, deliveryNotes] = await Promise.all([
+    const [products, lowStockBatches, criticalExpiry, newProducts, hospitals, deliveryNotes, periodEntries, periodExits] = await Promise.all([
       // All active products with batches
       prisma.product.findMany({
         where: { isActive: true },
@@ -114,15 +122,15 @@ export async function getDashboardStats(): Promise<{
       // Critical expiry count (< 30 days)
       prisma.batch.count({
         where: {
-          expiryDate: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+          expiryDate: { lte: new Date(endDate.getTime() + 30 * 24 * 60 * 60 * 1000) },
           quantity: { gt: 0 },
         },
       }),
-      // New products this month
+      // New products in date range
       prisma.product.count({
         where: {
           isActive: true,
-          createdAt: { gte: startOfMonth },
+          createdAt: { gte: startDate, lte: endDate },
         },
       }),
       // Active hospitals
@@ -136,6 +144,14 @@ export async function getDashboardStats(): Promise<{
           year: currentYear,
         },
         select: { status: true },
+      }),
+      // Period entries count
+      prisma.stockEntry.count({
+        where: { entryDate: { gte: startDate, lte: endDate } },
+      }),
+      // Period exits count
+      prisma.stockExit.count({
+        where: { exitDate: { gte: startDate, lte: endDate } },
       }),
     ]);
 
@@ -158,16 +174,6 @@ export async function getDashboardStats(): Promise<{
     const distributionsCompleted = deliveryNotes.filter(n => n.status === "LIVRE").length;
     const distributionsTotal = deliveryNotes.length;
 
-    // Get current month movements
-    const [monthlyEntries, monthlyExits] = await Promise.all([
-      prisma.stockEntry.count({
-        where: { entryDate: { gte: startOfMonth } },
-      }),
-      prisma.stockExit.count({
-        where: { exitDate: { gte: startOfMonth } },
-      }),
-    ]);
-
     return {
       success: true,
       data: {
@@ -180,8 +186,8 @@ export async function getDashboardStats(): Promise<{
         distributionsTotal,
         hospitalsActive: hospitals,
         monthlyStockChange: {
-          entries: monthlyEntries,
-          exits: monthlyExits,
+          entries: periodEntries,
+          exits: periodExits,
         },
       },
     };
@@ -254,23 +260,43 @@ export async function getStockByCategory(): Promise<{
  * Get stock movement trends for area chart
  */
 export async function getStockMovementTrends(
-  days: number = 90
+  fromDate?: Date,
+  toDate?: Date
 ): Promise<{
   success: boolean;
   data?: StockMovementTrend[];
   error?: string;
 }> {
   try {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setDate(startDate.getDate() - 90);
+    }
+    startDate.setHours(0, 0, 0, 0);
+    
+    // Calculate days difference for initializing the date map
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
     const [entries, exits] = await Promise.all([
       prisma.stockEntry.findMany({
-        where: { entryDate: { gte: startDate } },
+        where: { 
+          entryDate: { 
+            gte: startDate,
+            lte: endDate,
+          } 
+        },
         select: { entryDate: true, quantity: true },
       }),
       prisma.stockExit.findMany({
-        where: { exitDate: { gte: startDate } },
+        where: { 
+          exitDate: { 
+            gte: startDate,
+            lte: endDate,
+          } 
+        },
         select: { exitDate: true, quantity: true },
       }),
     ]);
@@ -279,7 +305,7 @@ export async function getStockMovementTrends(
     const dateMap = new Map<string, { entries: number; exits: number }>();
 
     for (let i = 0; i < days; i++) {
-      const date = new Date();
+      const date = new Date(endDate);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split("T")[0];
       dateMap.set(dateStr, { entries: 0, exits: 0 });
@@ -312,15 +338,29 @@ export async function getStockMovementTrends(
  * Get top hospitals by consumption
  */
 export async function getTopHospitals(
-  limit: number = 5
+  limit: number = 5,
+  fromDate?: Date,
+  toDate?: Date
 ): Promise<{
   success: boolean;
   data?: HospitalConsumption[];
   error?: string;
 }> {
   try {
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setMonth(startDate.getMonth() - 3);
+    }
+    startDate.setHours(0, 0, 0, 0);
+
     const exits = await prisma.stockExit.groupBy({
       by: ["hospitalId"],
+      where: {
+        exitDate: { gte: startDate, lte: endDate }
+      },
       _sum: { quantity: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: limit,
@@ -351,21 +391,32 @@ export async function getTopHospitals(
 /**
  * Get critical alerts for dashboard
  */
-export async function getCriticalAlerts(): Promise<{
+export async function getCriticalAlerts(
+  fromDate?: Date,
+  toDate?: Date
+): Promise<{
   success: boolean;
   data?: CriticalAlert[];
   error?: string;
 }> {
   try {
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setDate(startDate.getDate() - 30);
+    }
+    startDate.setHours(0, 0, 0, 0);
+
     const alerts: CriticalAlert[] = [];
     const now = new Date();
-    const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const threeMonths = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+    const thirtyDays = new Date(endDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     // Critical expiring (< 30 days)
     const criticalBatches = await prisma.batch.findMany({
       where: {
-        expiryDate: { lte: thirtyDays },
+        expiryDate: { lte: thirtyDays, gte: startDate },
         quantity: { gt: 0 },
       },
       include: { product: true },
@@ -433,15 +484,27 @@ export async function getCriticalAlerts(): Promise<{
  * Get recent activity for dashboard
  */
 export async function getRecentActivity(
-  limit: number = 10
+  limit: number = 10,
+  fromDate?: Date,
+  toDate?: Date
 ): Promise<{
   success: boolean;
   data?: RecentActivity[];
   error?: string;
 }> {
   try {
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setDate(startDate.getDate() - 30);
+    }
+    startDate.setHours(0, 0, 0, 0);
+
     const [entries, exits] = await Promise.all([
       prisma.stockEntry.findMany({
+        where: { entryDate: { gte: startDate, lte: endDate } },
         take: limit,
         orderBy: { entryDate: "desc" },
         include: {
@@ -449,6 +512,7 @@ export async function getRecentActivity(
         },
       }),
       prisma.stockExit.findMany({
+        where: { exitDate: { gte: startDate, lte: endDate } },
         take: limit,
         orderBy: { exitDate: "desc" },
         include: {
@@ -495,22 +559,26 @@ export async function getRecentActivity(
  * Get distribution events for calendar
  */
 export async function getDistributionEvents(
-  quarter?: number,
-  year?: number
+  fromDate?: Date,
+  toDate?: Date
 ): Promise<{
   success: boolean;
   data?: DistributionEvent[];
   error?: string;
 }> {
   try {
-    const now = new Date();
-    const targetQuarter = quarter || Math.floor(now.getMonth() / 3) + 1;
-    const targetYear = year || now.getFullYear();
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setMonth(startDate.getMonth() - 3);
+    }
+    startDate.setHours(0, 0, 0, 0);
 
     const deliveryNotes = await prisma.deliveryNote.findMany({
       where: {
-        quarter: targetQuarter,
-        year: targetYear,
+        createdAt: { gte: startDate, lte: endDate }
       },
       include: {
         hospital: { select: { id: true, name: true, code: true } },
@@ -552,7 +620,10 @@ export async function getDistributionEvents(
 /**
  * Get detailed category stats with monthly consumption
  */
-export async function getCategoryStats(): Promise<{
+export async function getCategoryStats(
+  fromDate?: Date,
+  toDate?: Date
+): Promise<{
   success: boolean;
   data?: CategoryStat[];
   error?: string;
@@ -564,12 +635,18 @@ export async function getCategoryStats(): Promise<{
       include: { batches: true },
     });
 
-    // Calculate last 3 months consumption per category
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    // Calculate consumption per category for date range
+    const endDate = toDate ? new Date(toDate) : new Date();
+    endDate.setHours(23, 59, 59, 999);
+    
+    const startDate = fromDate ? new Date(fromDate) : new Date();
+    if (!fromDate) {
+      startDate.setMonth(startDate.getMonth() - 3);
+    }
+    startDate.setHours(0, 0, 0, 0);
 
     const stockExits = await prisma.stockExit.findMany({
-      where: { exitDate: { gte: threeMonthsAgo } },
+      where: { exitDate: { gte: startDate, lte: endDate } },
       include: { product: { select: { category: true } } },
     });
 
@@ -612,11 +689,14 @@ export async function getCategoryStats(): Promise<{
       });
     }
 
+    // Calculate months difference for avg calculation
+    const monthsDiff = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)));
+
     // Build result with monthly consumption
     const data: CategoryStat[] = Array.from(categoryMap.entries()).map(
       ([category, stats]) => {
         const totalConsumption = consumptionByCategory.get(category) || 0;
-        const avgMonthlyConsumption = totalConsumption / 3;
+        const avgMonthlyConsumption = totalConsumption / monthsDiff;
 
         return {
           category,
@@ -636,5 +716,258 @@ export async function getCategoryStats(): Promise<{
   } catch (error) {
     console.error("Category stats error:", error);
     return { success: false, error: "Erreur lors de la récupération des statistiques" };
+  }
+}
+
+// Type for budget consumption
+export interface BudgetConsumption {
+  category: Category;
+  budget: number;
+  consumed: number;
+  remaining: number;
+  percentage: number;
+  quarter: number;
+  year: number;
+}
+
+/**
+ * Get budget consumption by category for current quarter
+ */
+export async function getBudgetConsumption(
+  quarter?: number,
+  year?: number
+): Promise<{
+  success: boolean;
+  data?: BudgetConsumption[];
+  error?: string;
+}> {
+  try {
+    const now = new Date();
+    const targetQuarter = quarter || Math.floor(now.getMonth() / 3) + 1;
+    const targetYear = year || now.getFullYear();
+
+    // Get all allocations for the year
+    const allocations = await prisma.annualAllocation.findMany({
+      where: { year: targetYear },
+    });
+
+    // Group by category and sum up
+    const categoryMap = new Map<Category, { budget: number; consumed: number }>();
+
+    for (const allocation of allocations) {
+      const existing = categoryMap.get(allocation.category) || { budget: 0, consumed: 0 };
+      
+      // Get consumed for target quarter
+      let quarterConsumed = 0;
+      switch (targetQuarter) {
+        case 1: quarterConsumed = allocation.q1Consumed.toNumber(); break;
+        case 2: quarterConsumed = allocation.q2Consumed.toNumber(); break;
+        case 3: quarterConsumed = allocation.q3Consumed.toNumber(); break;
+        case 4: quarterConsumed = allocation.q4Consumed.toNumber(); break;
+      }
+
+      // Annual budget, but we'll show quarterly progress
+      categoryMap.set(allocation.category, {
+        budget: existing.budget + allocation.budget.toNumber() / 4, // Quarterly budget
+        consumed: existing.consumed + quarterConsumed,
+      });
+    }
+
+    // Build result
+    const data: BudgetConsumption[] = Array.from(categoryMap.entries()).map(
+      ([category, stats]) => ({
+        category,
+        budget: Math.round(stats.budget),
+        consumed: Math.round(stats.consumed),
+        remaining: Math.round(stats.budget - stats.consumed),
+        percentage: stats.budget > 0 ? Math.round((stats.consumed / stats.budget) * 100) : 0,
+        quarter: targetQuarter,
+        year: targetYear,
+      })
+    );
+
+    // Sort by percentage descending (most consumed first)
+    data.sort((a, b) => b.percentage - a.percentage);
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Budget consumption error:", error);
+    return { success: false, error: "Erreur lors de la récupération du budget" };
+  }
+}
+
+/**
+ * Get products for command menu search
+ */
+export async function getProductsForSearch(): Promise<{
+  success: boolean;
+  data?: Array<{ id: string; name: string; code: string }>;
+  error?: string;
+}> {
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true, code: true },
+      orderBy: { name: "asc" },
+      take: 50,
+    });
+
+    return { success: true, data: products };
+  } catch (error) {
+    console.error("Products search error:", error);
+    return { success: false, error: "Erreur lors de la récupération des produits" };
+  }
+}
+
+/**
+ * Get hospitals for command menu search
+ */
+export async function getHospitalsForSearch(): Promise<{
+  success: boolean;
+  data?: Array<{ id: string; name: string; code: string }>;
+  error?: string;
+}> {
+  try {
+    const hospitals = await prisma.hospital.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true, code: true },
+      orderBy: { name: "asc" },
+      take: 50,
+    });
+
+    return { success: true, data: hospitals };
+  } catch (error) {
+    console.error("Hospitals search error:", error);
+    return { success: false, error: "Erreur lors de la récupération des hôpitaux" };
+  }
+}
+
+// Type for critical product in data table
+export interface CriticalProduct {
+  id: string;
+  code: string;
+  name: string;
+  category: Category;
+  unit: string;
+  currentStock: number;
+  minStock: number;
+  daysUntilExpiry: number | null;
+  batchNumber: string | null;
+  urgency: "CRITICAL" | "WARNING" | "NOTICE";
+  urgencyType: "EXPIRY" | "LOW_STOCK" | "BOTH";
+}
+
+/**
+ * Get critical products for data table (low stock + expiring)
+ */
+export async function getCriticalProducts(): Promise<{
+  success: boolean;
+  data?: CriticalProduct[];
+  error?: string;
+}> {
+  try {
+    const now = new Date();
+    const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    // Get products with low stock
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      include: { batches: true },
+    });
+
+    // Get batches expiring within 30 days
+    const expiringBatches = await prisma.batch.findMany({
+      where: {
+        expiryDate: { lte: thirtyDays },
+        quantity: { gt: 0 },
+      },
+      include: { product: true },
+    });
+
+    const criticalProductsMap = new Map<string, CriticalProduct>();
+
+    // Process low stock products
+    for (const product of products) {
+      const totalStock = product.batches.reduce(
+        (sum, batch) => sum + batch.quantity,
+        0
+      );
+
+      if (totalStock <= product.minStock) {
+        const nearestExpiry = product.batches
+          .filter((b) => b.expiryDate && b.quantity > 0)
+          .sort((a, b) => (a.expiryDate!.getTime() - b.expiryDate!.getTime()))[0];
+
+        const daysUntilExpiry = nearestExpiry?.expiryDate
+          ? Math.ceil((nearestExpiry.expiryDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
+          : null;
+
+        const isCriticalStock = totalStock === 0;
+        const isCriticalExpiry = daysUntilExpiry !== null && daysUntilExpiry <= 7;
+
+        criticalProductsMap.set(product.id, {
+          id: product.id,
+          code: product.code,
+          name: product.name,
+          category: product.category,
+          unit: product.unit,
+          currentStock: totalStock,
+          minStock: product.minStock,
+          daysUntilExpiry,
+          batchNumber: nearestExpiry?.batchNumber || null,
+          urgency: isCriticalStock || isCriticalExpiry ? "CRITICAL" : "WARNING",
+          urgencyType: daysUntilExpiry !== null && daysUntilExpiry <= 30 ? "BOTH" : "LOW_STOCK",
+        });
+      }
+    }
+
+    // Process expiring batches (add or update)
+    for (const batch of expiringBatches) {
+      const daysUntilExpiry = Math.ceil(
+        (batch.expiryDate!.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+      );
+
+      const existing = criticalProductsMap.get(batch.product.id);
+      
+      if (existing) {
+        // Update existing to include expiry info
+        existing.daysUntilExpiry = daysUntilExpiry;
+        existing.batchNumber = batch.batchNumber;
+        existing.urgencyType = "BOTH";
+        if (daysUntilExpiry <= 7) existing.urgency = "CRITICAL";
+      } else {
+        // Add new expiry-only product
+        // Look up full product data from already-fetched products array
+        const fullProduct = products.find(p => p.id === batch.product.id);
+        const totalStock = fullProduct?.batches.reduce(
+          (sum, b) => sum + b.quantity, 0
+        ) ?? 0;
+
+        criticalProductsMap.set(batch.product.id, {
+          id: batch.product.id,
+          code: batch.product.code,
+          name: batch.product.name,
+          category: batch.product.category,
+          unit: batch.product.unit,
+          currentStock: totalStock,
+          minStock: batch.product.minStock,
+          daysUntilExpiry,
+          batchNumber: batch.batchNumber,
+          urgency: daysUntilExpiry <= 7 ? "CRITICAL" : "WARNING",
+          urgencyType: "EXPIRY",
+        });
+      }
+    }
+
+    // Convert to array and sort by urgency
+    const data = Array.from(criticalProductsMap.values()).sort((a, b) => {
+      const urgencyOrder = { CRITICAL: 0, WARNING: 1, NOTICE: 2 };
+      return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Critical products error:", error);
+    return { success: false, error: "Erreur lors de la récupération des produits critiques" };
   }
 }

@@ -41,9 +41,9 @@ function formatDateTime(date: Date | string): string {
   return new Date(date).toLocaleString("fr-FR");
 }
 
-function triggerDownload(buffer: Buffer, filename: string) {
+function triggerDownload(buffer: any, filename: string) {
   if (typeof window !== "undefined") {
-    const blob = new Blob([buffer], {
+    const blob = new Blob([new Uint8Array(buffer)], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     const url = window.URL.createObjectURL(blob);
@@ -120,7 +120,7 @@ export async function exportQuarterlyReport(
       date: formatDate(dist.exitDate),
       hospital: dist.hospital.name,
       product: dist.product.name,
-      category: categoryLabels[dist.product.category],
+      category: categoryLabels[dist.product.category as Category],
       quantity: dist.quantity,
       unit: dist.product.unit,
       value: formatCurrency(Number(dist.product.price || 0) * dist.quantity),
@@ -128,7 +128,7 @@ export async function exportQuarterlyReport(
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
-  triggerDownload(buffer as Buffer, `rapport_T${quarter}_${year}.xlsx`);
+  triggerDownload(buffer as any, `rapport_T${quarter}_${year}.xlsx`);
 }
 
 export async function exportAnnualReport(year: number, data: any) {
@@ -187,7 +187,7 @@ export async function exportAnnualReport(year: number, data: any) {
     });
 
   const buffer = await workbook.xlsx.writeBuffer();
-  triggerDownload(buffer as Buffer, `rapport_annuel_${year}.xlsx`);
+  triggerDownload(buffer as any, `rapport_annuel_${year}.xlsx`);
 }
 
 export async function exportActivityLogs(logs: any[]) {
@@ -216,7 +216,7 @@ export async function exportActivityLogs(logs: any[]) {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const dateStr = new Date().toISOString().split("T")[0];
-  triggerDownload(buffer as Buffer, `journal_activite_${dateStr}.xlsx`);
+  triggerDownload(buffer as any, `journal_activite_${dateStr}.xlsx`);
 }
 
 export async function exportStockInventory(products: any[]) {
@@ -244,7 +244,7 @@ export async function exportStockInventory(products: any[]) {
     sheet.addRow({
       code: p.code,
       name: p.name,
-      category: categoryLabels[p.category],
+      category: categoryLabels[p.category as Category],
       stock: p.currentStock,
       unit: p.unit,
       minStock: p.minStock,
@@ -256,5 +256,5 @@ export async function exportStockInventory(products: any[]) {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const dateStr = new Date().toISOString().split("T")[0];
-  triggerDownload(buffer as Buffer, `inventaire_stock_${dateStr}.xlsx`);
+  triggerDownload(buffer as any, `inventaire_stock_${dateStr}.xlsx`);
 }

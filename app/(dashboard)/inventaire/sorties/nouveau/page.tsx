@@ -23,8 +23,8 @@ export default async function NewStockExitPage() {
     getHospitals(),
   ]);
 
-  const products = productsResult.success ? productsResult.data : [];
-  const hospitals = hospitalsResult.success ? hospitalsResult.data : [];
+  const products = productsResult.success ? productsResult.data ?? [] : [];
+  const hospitals = hospitalsResult.success ? hospitalsResult.data ?? [] : [];
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6">

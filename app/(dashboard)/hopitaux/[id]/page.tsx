@@ -315,7 +315,7 @@ export default async function HospitalDetailPage({
                       <div className="flex items-center justify-between mb-2">
                         <div>
                           <p className="font-medium">
-                            {categoryLabels[allocation.category]}
+                            {categoryLabels[allocation.category as Category]}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             Année {allocation.year}

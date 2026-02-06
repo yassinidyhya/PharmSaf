@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function NewStockEntryPage() {
   const result = await getProductsForEntry();
-  const products = result.success ? result.data : [];
+  const products = result.success ? result.data ?? [] : [];
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6">

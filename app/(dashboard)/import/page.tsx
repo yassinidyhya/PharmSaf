@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Metadata } from "next";
+
 import {
   Upload,
   FileSpreadsheet,
@@ -80,11 +80,6 @@ const hospitalTypeExamples = `Exemples de types valides:
 - CENTRE_SANTE (ou Centre de Santé, CS)
 - HOPITAL_PROVINCIAL (ou Hôpital Provincial, HP)`;
 
-export const metadata: Metadata = {
-  title: "Import Excel | Pharmacie Provinciale",
-  description: "Importer des données depuis Excel",
-};
-
 export default function ImportPage() {
   const [selectedType, setSelectedType] = useState<"products" | "stock" | "hospitals">("products");
   const [file, setFile] = useState<File | null>(null);
@@ -118,10 +113,10 @@ export default function ImportPage() {
       const buffer = await selectedFile.arrayBuffer();
       const result = await previewImport(selectedType, Buffer.from(buffer));
       
-      if (result.success && result.preview) {
+      if (result.success && 'preview' in result && result.preview) {
         setPreview(result.preview);
         toast.success(`${result.preview.length} lignes trouvées (aperçu des 10 premières)`);
-      } else if (result.errors && result.errors.length > 0) {
+      } else if ('errors' in result && result.errors && result.errors.length > 0) {
         setPreviewErrors(result.errors);
         toast.error(`${result.errors.length} erreurs trouvées`);
       }
@@ -154,7 +149,7 @@ export default function ImportPage() {
 
       setResult(result);
 
-      if (result.success) {
+      if (result.success && 'summary' in result && result.summary) {
         toast.success(
           `Import terminé: ${result.summary.created} créés, ${result.summary.updated} mis à jour`
         );
@@ -365,7 +360,7 @@ export default function ImportPage() {
           <Button
             size="lg"
             onClick={handleImport}
-            disabled={importing || (previewErrors && previewErrors.length > 0)}
+            disabled={importing || !!(previewErrors && previewErrors.length > 0)}
           >
             {importing ? (
               <>

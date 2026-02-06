@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { subDays, startOfDay, endOfDay } from "date-fns"
 import {
   getDashboardStats,
   getStockByCategory,
@@ -10,6 +11,8 @@ import {
   getRecentActivity,
   getDistributionEvents,
   getCategoryStats,
+  getCriticalProducts,
+  getBudgetConsumption,
 } from "./actions"
 import { KpiHeader } from "@/components/dashboard/kpi-header"
 import { CategoryStats } from "@/components/dashboard/category-stats"
@@ -19,11 +22,21 @@ import { CategoryDistribution } from "@/components/dashboard/category-distributi
 import { MovementTrends } from "@/components/dashboard/movement-trends"
 import { TopHospitals } from "@/components/dashboard/top-hospitals"
 import { DistributionCalendar } from "@/components/dashboard/distribution-calendar"
+import { CriticalProductsTable } from "@/components/dashboard/critical-products-table"
+import { BudgetTracker } from "@/components/dashboard/budget-tracker"
 import DashboardLoading from "./loading"
+
+interface DateRange {
+  from: Date
+  to: Date
+}
 
 // Main dashboard content
 function DashboardContent() {
-  const [timeRange, setTimeRange] = React.useState<"7" | "30" | "90" | "365">("30")
+  const [dateRange, setDateRange] = React.useState<DateRange>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  })
   const [data, setData] = React.useState<{
     stats: Awaited<ReturnType<typeof getDashboardStats>>["data"]
     categories: Awaited<ReturnType<typeof getStockByCategory>>["data"]
@@ -33,44 +46,72 @@ function DashboardContent() {
     activities: Awaited<ReturnType<typeof getRecentActivity>>["data"]
     distributions: Awaited<ReturnType<typeof getDistributionEvents>>["data"]
     categoryStats: Awaited<ReturnType<typeof getCategoryStats>>["data"]
+    criticalProducts: Awaited<ReturnType<typeof getCriticalProducts>>["data"]
+    budgetConsumption: Awaited<ReturnType<typeof getBudgetConsumption>>["data"]
   } | null>(null)
 
   React.useEffect(() => {
     async function fetchData() {
-      const [
-        statsResult,
-        categoryResult,
-        trendsResult,
-        hospitalsResult,
-        alertsResult,
-        activityResult,
-        distributionResult,
-        categoryStatsResult,
-      ] = await Promise.all([
-        getDashboardStats(),
-        getStockByCategory(),
-        getStockMovementTrends(parseInt(timeRange)),
-        getTopHospitals(5),
-        getCriticalAlerts(),
-        getRecentActivity(10),
-        getDistributionEvents(),
-        getCategoryStats(),
-      ])
+      try {
+        const from = startOfDay(dateRange.from)
+        const to = endOfDay(dateRange.to)
 
-      setData({
-        stats: statsResult.success ? statsResult.data : null,
-        categories: categoryResult.success ? categoryResult.data : [],
-        trends: trendsResult.success ? trendsResult.data : [],
-        hospitals: hospitalsResult.success ? hospitalsResult.data : [],
-        alerts: alertsResult.success ? alertsResult.data : [],
-        activities: activityResult.success ? activityResult.data : [],
-        distributions: distributionResult.success ? distributionResult.data : [],
-        categoryStats: categoryStatsResult.success ? categoryStatsResult.data : [],
-      })
+        const [
+          statsResult,
+          categoryResult,
+          trendsResult,
+          hospitalsResult,
+          alertsResult,
+          activityResult,
+          distributionResult,
+          categoryStatsResult,
+          criticalProductsResult,
+          budgetResult,
+        ] = await Promise.all([
+          getDashboardStats(from, to),
+          getStockByCategory(),
+          getStockMovementTrends(from, to),
+          getTopHospitals(5, from, to),
+          getCriticalAlerts(from, to),
+          getRecentActivity(10, from, to),
+          getDistributionEvents(from, to),
+          getCategoryStats(from, to),
+          getCriticalProducts(),
+          getBudgetConsumption(),
+        ])
+
+        setData({
+          stats: statsResult.success ? statsResult.data : undefined,
+          categories: categoryResult.success ? categoryResult.data : [],
+          trends: trendsResult.success ? trendsResult.data : [],
+          hospitals: hospitalsResult.success ? hospitalsResult.data : [],
+          alerts: alertsResult.success ? alertsResult.data : [],
+          activities: activityResult.success ? activityResult.data : [],
+          distributions: distributionResult.success ? distributionResult.data : [],
+          categoryStats: categoryStatsResult.success ? categoryStatsResult.data : [],
+          criticalProducts: criticalProductsResult.success ? criticalProductsResult.data : [],
+          budgetConsumption: budgetResult.success ? budgetResult.data : [],
+        })
+      } catch (error) {
+        console.error("Dashboard fetch error:", error)
+        // Set empty data to stop loading
+        setData({
+          stats: undefined,
+          categories: [],
+          trends: [],
+          hospitals: [],
+          alerts: [],
+          activities: [],
+          distributions: [],
+          categoryStats: [],
+          criticalProducts: [],
+          budgetConsumption: [],
+        })
+      }
     }
 
     fetchData()
-  }, [timeRange])
+  }, [dateRange])
 
   if (!data) {
     return <DashboardLoading />
@@ -83,21 +124,41 @@ function DashboardContent() {
         {data.stats && (
           <KpiHeader
             stats={data.stats}
-            timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
           />
         )}
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6 pt-2">
+      <div className="flex-1 space-y-3 sm:space-y-4 lg:space-y-6 p-2 sm:p-3 lg:p-4 xl:p-6 pt-2">
+        {/* Critical Products Table */}
+        {data.criticalProducts && data.criticalProducts.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
+              <div>
+                <h2 className="text-sm sm:text-base lg:text-lg font-semibold">
+                  Produits Requérant Attention
+                  <span className="ml-1.5 sm:ml-2 text-xs sm:text-sm font-normal text-muted-foreground">
+                    ({data.criticalProducts.length})
+                  </span>
+                </h2>
+                <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
+                  Stock faible ou péremption proche
+                </p>
+              </div>
+            </div>
+            <CriticalProductsTable data={data.criticalProducts} />
+          </section>
+        )}
+
         {/* Category Stats - Stock by Category with Months */}
         {data.categoryStats && data.categoryStats.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4">
               <div>
-                <h2 className="text-base sm:text-lg font-semibold">Stock par Catégorie</h2>
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <h2 className="text-sm sm:text-base lg:text-lg font-semibold">Stock par Catégorie</h2>
+                <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground">
                   Niveaux de stock et mois de couverture
                 </p>
               </div>
@@ -107,30 +168,23 @@ function DashboardContent() {
         )}
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           <CategoryDistribution data={data.categories || []} />
-          <MovementTrends data={data.trends || []} />
+          <MovementTrends data={data.trends || []} fromDate={dateRange.from} toDate={dateRange.to} />
         </div>
 
-        {/* Middle Row: Top Hospitals + Distribution Calendar + Alerts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          <TopHospitals data={data.hospitals || []} />
+        {/* Middle Row: Budget Tracker + Distribution Calendar + Alerts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          <BudgetTracker data={data.budgetConsumption || []} />
           <DistributionCalendar events={data.distributions || []} />
           <AlertsWidget alerts={data.alerts || []} />
         </div>
 
-        {/* Recent Activity Section */}
-        <section>
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <div>
-              <h2 className="text-base sm:text-lg font-semibold">Activité Récente</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Derniers mouvements de stock
-              </p>
-            </div>
-          </div>
+        {/* Bottom Row: Top Hospitals + Recent Activity */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+          <TopHospitals data={data.hospitals || []} />
           <RecentActivity activities={data.activities || []} />
-        </section>
+        </div>
       </div>
     </div>
   )

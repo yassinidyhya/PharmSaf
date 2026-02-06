@@ -330,7 +330,7 @@ export default function QuarterlyReportPage() {
                           <div>
                             <p className="font-medium">{dist.product.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {categoryLabels[dist.product.category]}
+                              {categoryLabels[dist.product.category as Category]}
                             </p>
                           </div>
                         </TableCell>

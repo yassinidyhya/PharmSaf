@@ -65,18 +65,18 @@ export function DataTable<TData, TValue>({
   return (
     <div className="w-full">
       {filterColumn && (
-        <div className="flex items-center py-3">
+        <div className="flex items-center py-2 sm:py-3">
           <Input
             placeholder={filterPlaceholder}
             value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn(filterColumn)?.setFilterValue(event.target.value)
             }
-            className="max-w-sm"
+            className="max-w-sm h-8 sm:h-10 text-xs sm:text-sm"
           />
         </div>
       )}
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -120,22 +120,24 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-3">
+      <div className="flex items-center justify-end space-x-1.5 sm:space-x-2 py-2 sm:py-3">
         <Button
           variant="outline"
           size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
+          className="h-7 sm:h-8 text-xs"
         >
-          Précédent
+          Préc.
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
+          className="h-7 sm:h-8 text-xs"
         >
-          Suivant
+          Suiv.
         </Button>
       </div>
     </div>

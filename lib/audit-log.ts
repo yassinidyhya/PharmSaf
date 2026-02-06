@@ -23,7 +23,6 @@ export async function logActivity(options: LogActivityOptions) {
         entityId: options.entityId,
         description: options.description,
         metadata: options.metadata ? JSON.stringify(options.metadata) : null,
-        ipAddress: options.ipAddress,
       },
     });
   } catch (error) {

@@ -1,77 +1,56 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import Link from "next/link"
+import { IconArrowRight, IconBuildingHospital } from "@tabler/icons-react"
+import { RippleButton } from "@/components/ui/ripple-button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { formatNumber } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 interface HospitalData {
-  hospitalId: string;
-  hospitalName: string;
-  totalQuantity: number;
-  totalValue: number;
+  hospitalId: string
+  hospitalName: string
+  totalQuantity: number
+  totalValue: number
 }
 
 interface TopHospitalsProps {
-  data: HospitalData[];
+  data: HospitalData[]
 }
 
-const chartConfig = {
-  totalQuantity: {
-    label: "Quantité",
-    color: "var(--chart-1)",
-  },
-} satisfies ChartConfig;
-
-// Truncate hospital name for display
-function truncateName(name: string, maxLength: number = 18): string {
-  if (name.length <= maxLength) return name;
-  return name.slice(0, maxLength) + "...";
+// Generate consistent colors for hospitals
+function getHospitalColor(index: number): string {
+  const colors = [
+    "bg-blue-500",
+    "bg-emerald-500",
+    "bg-violet-500",
+    "bg-amber-500",
+    "bg-rose-500",
+  ]
+  return colors[index % colors.length]
 }
 
 export function TopHospitals({ data }: TopHospitalsProps) {
-  const chartData = data.map((h) => ({
-    name: h.hospitalName,
-    shortName: truncateName(h.hospitalName, 14),
-    quantity: h.totalQuantity,
-    value: h.totalValue,
-    id: h.hospitalId,
-  }));
+  const totalQuantity = data.reduce((sum, h) => sum + h.totalQuantity, 0)
+  const maxQuantity = Math.max(...data.map(h => h.totalQuantity), 1)
 
-  const totalQuantity = data.reduce((sum, h) => sum + h.totalQuantity, 0);
-
-  // Empty state
   if (data.length === 0) {
     return (
       <Card className="h-full">
-        <CardHeader>
+        <CardHeader className="pb-3">
           <CardTitle className="text-base sm:text-lg">Top Hôpitaux</CardTitle>
           <CardDescription className="text-xs">Consommation par établissement</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center text-muted-foreground">
-            <p className="text-sm">Aucune donnée disponible</p>
-          </div>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <IconBuildingHospital className="w-10 h-10 mb-3 text-muted-foreground/50" />
+          <p className="text-sm font-medium text-muted-foreground">Aucune donnée disponible</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Les consommations apparaîtront ici</p>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -83,84 +62,54 @@ export function TopHospitals({ data }: TopHospitalsProps) {
             <CardDescription className="text-xs">Consommation par établissement</CardDescription>
           </div>
           <div className="text-right">
-            <p className="text-xl sm:text-2xl font-bold">{formatNumber(totalQuantity)}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">unités distribuées</p>
+            <p className="text-lg sm:text-xl font-bold tabular-nums">{formatNumber(totalQuantity)}</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground">unités distribuées</p>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1">
-        <ChartContainer config={chartConfig} className="h-[160px] sm:h-[180px] w-full">
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            layout="vertical"
-            margin={{ left: 0, right: 10, top: 5, bottom: 5 }}
-          >
-            <XAxis type="number" dataKey="quantity" hide />
-            <YAxis
-              dataKey="shortName"
-              type="category"
-              tickLine={false}
-              tickMargin={8}
-              axisLine={false}
-              width={90}
-              style={{ fontSize: 11 }}
-            />
-            <ChartTooltip
-              cursor={{ fill: "var(--muted)", opacity: 0.1 }}
-              content={
-                <ChartTooltipContent
-                  hideLabel
-                  formatter={(value: number, _name, payload) => (
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-medium text-xs">{payload?.payload?.name}</span>
-                      <span className="text-muted-foreground text-xs">
-                        {formatNumber(value)} unités
-                      </span>
-                    </div>
-                  )}
-                />
-              }
-            />
-            <Bar
-              dataKey="quantity"
-              fill="var(--color-totalQuantity)"
-              radius={[0, 4, 4, 0]}
-              maxBarSize={28}
-            />
-          </BarChart>
-        </ChartContainer>
-
-        {/* Hospital List Preview */}
-        <div className="mt-3 space-y-1">
-          {data.slice(0, 3).map((hospital, index) => (
+      <CardContent className="flex-1 space-y-3">
+        {data.map((hospital, index) => {
+          const percentage = maxQuantity > 0 ? Math.round((hospital.totalQuantity / maxQuantity) * 100) : 0
+          
+          return (
             <Link
               key={hospital.hospitalId}
               href={`/hopitaux/${hospital.hospitalId}`}
-              className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors group text-sm"
+              className="group block"
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-xs text-muted-foreground w-4">{index + 1}.</span>
-                <span className="truncate group-hover:text-primary transition-colors">
-                  {truncateName(hospital.hospitalName, 22)}
-                </span>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Badge variant="outline" className="w-4 h-4 sm:w-5 sm:h-5 p-0 flex items-center justify-center text-[9px] sm:text-[10px]">
+                      {index + 1}
+                    </Badge>
+                    <span className="font-medium truncate max-w-[120px] sm:max-w-[140px] lg:max-w-[180px] group-hover:text-primary transition-colors">
+                      {hospital.hospitalName}
+                    </span>
+                  </div>
+                  <span className="text-[10px] sm:text-xs tabular-nums font-medium">
+                    {formatNumber(hospital.totalQuantity)}
+                  </span>
+                </div>
+                <Progress 
+                  value={percentage} 
+                  className={cn("h-1.5 sm:h-2", getHospitalColor(index))}
+                />
               </div>
-              <span className="font-medium text-xs shrink-0">
-                {formatNumber(hospital.totalQuantity)}
-              </span>
             </Link>
-          ))}
-        </div>
+          )
+        })}
       </CardContent>
 
-      <CardFooter className="pt-0">
-        <Button variant="ghost" size="sm" className="w-full text-xs" asChild>
-          <Link href="/hopitaux">
-            Voir tous les hôpitaux
-          </Link>
-        </Button>
+      <CardFooter className="pt-0 justify-center">
+        <Link href="/hopitaux">
+          <RippleButton rippleColor="hsl(var(--primary))" className="hover:text-primary hover:border-primary/50">
+            <span>Voir tous les hôpitaux</span>
+            <IconArrowRight className="w-3 h-3 ml-1" />
+          </RippleButton>
+        </Link>
       </CardFooter>
     </Card>
-  );
+  )
 }

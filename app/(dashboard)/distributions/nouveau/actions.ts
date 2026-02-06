@@ -5,7 +5,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Category } from "@prisma/client";
 import { logDistributionCreate } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
+
+const INSULIN_KEYWORDS = ["insuline", "insulin", "glargine", "lispro", "aspart", "détemir", "nph"];
+const INSULIN_MIN_MONTHS = 3;
 
 const createDistributionSchema = z.object({
   hospitalId: z.string().min(1, "L'hôpital est requis"),
@@ -19,6 +22,18 @@ const createDistributionSchema = z.object({
     })
   ).min(1, "Au moins un produit est requis"),
 });
+
+function isInsulinProduct(productName: string): boolean {
+  const normalized = productName.toLowerCase();
+  return INSULIN_KEYWORDS.some(keyword => normalized.includes(keyword));
+}
+
+function getMonthsUntilExpiry(expiryDate: Date): number {
+  const now = new Date();
+  const diffTime = expiryDate.getTime() - now.getTime();
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  return Math.floor(diffDays / 30);
+}
 
 export async function getHospitalsWithBudget(year: number, quarter: number) {
   try {
@@ -49,12 +64,6 @@ export async function getHospitalsWithBudget(year: number, quarter: number) {
       const budgetByCategory: Record<string, { budget: number; consumed: number; remaining: number }> = {};
 
       hospital.allocations.forEach((alloc) => {
-        const consumed =
-          Number(alloc.q1Consumed) +
-          Number(alloc.q2Consumed) +
-          Number(alloc.q3Consumed) +
-          Number(alloc.q4Consumed);
-
         // Calculate consumed up to selected quarter
         let consumedUpToQuarter = 0;
         if (quarter >= 1) consumedUpToQuarter += Number(alloc.q1Consumed);
@@ -229,6 +238,78 @@ async function generateNoteNumber(tx: any, year: number): Promise<string> {
   return `${year}-${String(nextNumber).padStart(3, "0")}`;
 }
 
+/**
+ * Validates FEFO (First Expired First Out) compliance.
+ * Returns error message if selected batch violates FEFO rules.
+ */
+async function validateFEFO(
+  tx: any,
+  productId: string,
+  selectedBatchId: string
+): Promise<string | null> {
+  const selectedBatch = await tx.batch.findUnique({
+    where: { id: selectedBatchId },
+    select: { expiryDate: true, batchNumber: true },
+  });
+
+  if (!selectedBatch) {
+    return "Lot sélectionné introuvable";
+  }
+
+  // Check if earlier-expiring batches exist with stock
+  const earlierBatches = await tx.batch.findMany({
+    where: {
+      productId,
+      expiryDate: { lt: selectedBatch.expiryDate },
+      quantity: { gt: 0 },
+    },
+    orderBy: { expiryDate: "asc" },
+    select: { batchNumber: true, expiryDate: true },
+  });
+
+  if (earlierBatches.length > 0) {
+    const batchList = earlierBatches.map((b: { batchNumber: string }) => b.batchNumber).join(", ");
+    return `Règle FEFO: Veuillez d'abord utiliser le(s) lot(s) ${batchList} qui expire(nt) plus tôt`;
+  }
+
+  return null;
+}
+
+/**
+ * Validates insulin expiry rule (minimum 3 months remaining).
+ */
+async function validateInsulinExpiry(
+  tx: any,
+  productId: string,
+  batchId: string
+): Promise<string | null> {
+  const product = await tx.product.findUnique({
+    where: { id: productId },
+    select: { name: true },
+  });
+
+  if (!product || !isInsulinProduct(product.name)) {
+    return null; // Not insulin, no special validation needed
+  }
+
+  const batch = await tx.batch.findUnique({
+    where: { id: batchId },
+    select: { expiryDate: true, batchNumber: true },
+  });
+
+  if (!batch) {
+    return "Lot introuvable";
+  }
+
+  const monthsUntilExpiry = getMonthsUntilExpiry(batch.expiryDate);
+
+  if (monthsUntilExpiry < INSULIN_MIN_MONTHS) {
+    return `Règle insuline: Le lot ${batch.batchNumber} expire dans ${monthsUntilExpiry} mois. La péremption doit être > ${INSULIN_MIN_MONTHS} mois.`;
+  }
+
+  return null;
+}
+
 export async function createDistribution(data: {
   hospitalId: string;
   quarter: number;
@@ -238,27 +319,103 @@ export async function createDistribution(data: {
   try {
     const validatedData = createDistributionSchema.parse(data);
 
-    // Get products with prices for cost calculation
+    // Get current user for audit logging
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return { success: false, error: "Non authentifié" };
+    }
+
+    // Get products with prices for cost calculation and validation
     const products = await prisma.product.findMany({
       where: { id: { in: validatedData.items.map((i) => i.productId) } },
-      select: { id: true, category: true, price: true },
+      select: { id: true, category: true, price: true, name: true },
     });
 
     // Calculate cost by category and total amount
     const costByCategory: Record<string, number> = {};
     let totalAmount = 0;
-    validatedData.items.forEach((item) => {
+    const itemsWithPrice = validatedData.items.map((item) => {
       const product = products.find((p) => p.id === item.productId);
+      const unitPrice = Number(product?.price) || 0;
+      const cost = unitPrice * item.quantity;
+      
       if (product) {
-        const price = Number(product.price) || 0;
-        const cost = price * item.quantity;
         costByCategory[product.category] = (costByCategory[product.category] || 0) + cost;
         totalAmount += cost;
       }
+      
+      return { ...item, unitPrice };
     });
+
+    // === BUDGET VALIDATION ===
+    const budgetValidation = await validateDistribution(
+      validatedData.hospitalId,
+      validatedData.year,
+      validatedData.quarter,
+      itemsWithPrice
+    );
+
+    if (!budgetValidation.success) {
+      return { success: false, error: "Erreur lors de la validation du budget" };
+    }
+
+    if (!budgetValidation.data?.valid) {
+      const exceededCategories = Object.entries(budgetValidation.data?.byCategory ?? {})
+        .filter(([_, v]) => !v.valid)
+        .map(([cat, v]) => `${cat}: demandé ${v.requested.toFixed(2)} MAD, disponible ${v.remaining.toFixed(2)} MAD`)
+        .join("; ");
+      
+      return { 
+        success: false, 
+        error: `Budget insuffisant: ${exceededCategories}` 
+      };
+    }
 
     // Create stock exits, delivery note, and update allocations in a transaction
     const results = await prisma.$transaction(async (tx) => {
+      // Validate each item before processing
+      for (const item of validatedData.items) {
+        const product = products.find((p) => p.id === item.productId);
+        
+        if (!product) {
+          throw new Error(`Produit ${item.productId} introuvable`);
+        }
+
+        // === FEFO VALIDATION ===
+        const fefoError = await validateFEFO(tx, item.productId, item.batchId);
+        if (fefoError) {
+          throw new Error(fefoError);
+        }
+
+        // === INSULIN EXPIRY VALIDATION ===
+        const insulinError = await validateInsulinExpiry(tx, item.productId, item.batchId);
+        if (insulinError) {
+          throw new Error(insulinError);
+        }
+
+        // === ATOMIC STOCK CHECK & DECREMENT ===
+        const stockResult = await tx.batch.updateMany({
+          where: {
+            id: item.batchId,
+            quantity: { gte: item.quantity },
+          },
+          data: {
+            quantity: { decrement: item.quantity },
+          },
+        });
+
+        if (stockResult.count === 0) {
+          const batch = await tx.batch.findUnique({
+            where: { id: item.batchId },
+            select: { batchNumber: true, quantity: true },
+          });
+          throw new Error(
+            `Stock insuffisant pour le lot ${batch?.batchNumber || item.batchId}. ` +
+            `Disponible: ${batch?.quantity || 0}, Demandé: ${item.quantity}`
+          );
+        }
+      }
+
       // Generate delivery note number
       const noteNumber = await generateNoteNumber(tx, validatedData.year);
 
@@ -279,16 +436,9 @@ export async function createDistribution(data: {
       const deliveryItems = [];
 
       // Create stock exits and delivery note items
-      for (const item of validatedData.items) {
+      for (const item of itemsWithPrice) {
         const product = products.find((p) => p.id === item.productId);
-        const unitPrice = Number(product?.price) || 0;
-        const totalPrice = unitPrice * item.quantity;
-
-        // Update batch quantity
-        await tx.batch.update({
-          where: { id: item.batchId },
-          data: { quantity: { decrement: item.quantity } },
-        });
+        const totalPrice = item.unitPrice * item.quantity;
 
         // Create stock exit linked to delivery note
         const stockExit = await tx.stockExit.create({
@@ -311,7 +461,7 @@ export async function createDistribution(data: {
             deliveryNoteId: deliveryNote.id,
             batchId: item.batchId,
             quantity: item.quantity,
-            unitPrice,
+            unitPrice: item.unitPrice,
             totalPrice,
           },
         });
@@ -353,9 +503,9 @@ export async function createDistribution(data: {
       where: { id: validatedData.hospitalId },
       select: { name: true },
     });
-    const { userId } = await auth();
+    
     await logDistributionCreate(
-      userId || undefined,
+      userId,
       results.deliveryNote.id,
       hospital?.name || "Hôpital inconnu",
       validatedData.items.length,
@@ -377,6 +527,13 @@ export async function createDistribution(data: {
       return {
         success: false,
         error: error.issues.map((e) => e.message).join(", "),
+      };
+    }
+    // Return specific error messages from our validation functions
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
       };
     }
     return {

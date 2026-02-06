@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { SparklesText } from "@/components/ui/sparkles-text";
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
@@ -48,9 +49,13 @@ export function DashboardHeader({ onRefresh, isRefreshing }: DashboardHeaderProp
       {/* Main Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-0.5">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <SparklesText 
+            className="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            sparklesCount={15}
+            colors={{ first: "#3b82f6", second: "#f59e0b" }}
+          >
             {greeting}, {firstName}
-          </h1>
+          </SparklesText>
           <p className="text-xs sm:text-sm text-muted-foreground">
             {format(currentDate, "EEEE d MMMM yyyy", { locale: fr })}
           </p>

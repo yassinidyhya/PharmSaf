@@ -4,12 +4,13 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createProductSchema, updateProductSchema } from "@/lib/validation";
 import { z } from "zod";
+import { Category } from "@prisma/client";
 import { logProductCreate, logProductUpdate } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
 
 export interface ProductFilters {
   search?: string;
-  category?: string;
+  category?: Category;
   isActive?: boolean;
 }
 
@@ -27,7 +28,7 @@ export async function createProduct(formData: FormData) {
     });
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logProductCreate(userId || undefined, product.id, product.name, product.code);
 
     revalidatePath("/produits");
@@ -37,7 +38,7 @@ export async function createProduct(formData: FormData) {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map((e) => e.message).join(", "),
+        error: error.issues.map((e) => e.message).join(", "),
       };
     }
     return {
@@ -56,7 +57,7 @@ export async function getProducts(filters?: ProductFilters) {
         { code: { contains: filters.search, mode: "insensitive" as const } },
       ],
     }),
-    ...(filters?.category && { category: filters.category }),
+    ...(filters?.category && { category: filters.category as Category }),
   };
 
   const [products, total] = await Promise.all([
@@ -139,7 +140,7 @@ export async function updateProduct(id: string, formData: FormData) {
     });
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logProductUpdate(userId || undefined, product.id, product.name, validatedData);
 
     revalidatePath("/produits");
@@ -150,7 +151,7 @@ export async function updateProduct(id: string, formData: FormData) {
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: error.errors.map((e) => e.message).join(", "),
+        error: error.issues.map((e) => e.message).join(", "),
       };
     }
     return {

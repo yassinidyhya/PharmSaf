@@ -5,7 +5,7 @@ export const createProductSchema = z.object({
   code: z.string().min(1, "Le code est requis"),
   name: z.string().min(1, "Le nom est requis"),
   category: z.nativeEnum(Category, {
-    errorMap: () => ({ message: "La catégorie est requise" }),
+    message: "La catégorie est requise",
   }),
   unit: z.string().min(1, "L'unité est requise"),
   packaging: z.string().optional(),

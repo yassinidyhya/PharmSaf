@@ -24,12 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const stockEntrySchema = z.object({
   productId: z.string().min(1, "Le produit est requis"),
   quantity: z.coerce.number().min(1, "La quantité doit être au moins 1"),
   batchNumber: z.string().min(1, "Le numéro de lot est requis"),
   expiryDate: z.string().min(1, "La date d'expiration est requise"),
+  entryDate: z.string().optional(),
   temperature: z.string().optional(),
   referenceDoc: z.string().optional(),
   notes: z.string().optional(),
@@ -55,12 +58,13 @@ export function StockEntryForm({ products }: StockEntryFormProps) {
   const router = useRouter();
 
   const form = useForm<StockEntryInput>({
-    resolver: zodResolver(stockEntrySchema),
+    resolver: zodResolver(stockEntrySchema) as any,
     defaultValues: {
       productId: "",
       quantity: 1,
       batchNumber: "",
       expiryDate: "",
+      entryDate: format(new Date(), "yyyy-MM-dd"),
       temperature: "",
       referenceDoc: "",
       notes: "",
@@ -75,6 +79,7 @@ export function StockEntryForm({ products }: StockEntryFormProps) {
     formData.append("quantity", data.quantity.toString());
     formData.append("batchNumber", data.batchNumber);
     formData.append("expiryDate", data.expiryDate);
+    if (data.entryDate) formData.append("entryDate", data.entryDate);
     if (data.temperature) formData.append("temperature", data.temperature);
     if (data.referenceDoc) formData.append("referenceDoc", data.referenceDoc);
     if (data.notes) formData.append("notes", data.notes);
@@ -196,6 +201,28 @@ export function StockEntryForm({ products }: StockEntryFormProps) {
             )}
           />
 
+          {/* Entry Date */}
+          <Controller
+            name="entryDate"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="entryDate">Date d&apos;entrée</FieldLabel>
+                <Input
+                  {...field}
+                  id="entryDate"
+                  type="date"
+                  aria-invalid={fieldState.invalid}
+                  value={field.value || format(new Date(), "yyyy-MM-dd")}
+                />
+                <FieldDescription>Par défaut: aujourd&apos;hui</FieldDescription>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Temperature */}
           <Controller
             name="temperature"
@@ -215,27 +242,27 @@ export function StockEntryForm({ products }: StockEntryFormProps) {
               </Field>
             )}
           />
-        </div>
 
-        {/* Reference Document */}
-        <Controller
-          name="referenceDoc"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="referenceDoc">Document de référence</FieldLabel>
-              <Input
-                {...field}
-                id="referenceDoc"
-                placeholder="Facture N°12345, Bon de commande..."
-                aria-invalid={fieldState.invalid}
-                value={field.value || ""}
-              />
-              <FieldDescription>Numéro de facture ou bon de commande</FieldDescription>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          {/* Reference Document */}
+          <Controller
+            name="referenceDoc"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="referenceDoc">Document de référence</FieldLabel>
+                <Input
+                  {...field}
+                  id="referenceDoc"
+                  placeholder="Facture N°12345, Bon de commande..."
+                  aria-invalid={fieldState.invalid}
+                  value={field.value || ""}
+                />
+                <FieldDescription>Numéro de facture ou bon de commande</FieldDescription>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </div>
 
         {/* Notes */}
         <Controller

@@ -27,6 +27,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar"
 
 const data = {
@@ -61,6 +62,8 @@ const data = {
       url: "/bons-livraison",
       icon: IconTruckDelivery,
     },
+  ],
+  navTools: [
     {
       title: "Rapports",
       url: "/rapports",
@@ -96,17 +99,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="/">
-                <IconBuildingHospital className="!size-5" />
-                <span className="text-base font-semibold">Pharmacie Provinciale</span>
+              <a href="/" className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-emerald-500">
+                  <IconBuildingHospital className="!size-5 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold leading-tight">Pharmacie</span>
+                  <span className="text-xs text-muted-foreground leading-tight">Provinciale</span>
+                </div>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="gap-0">
         <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <SidebarSeparator className="mx-4 my-2 w-auto" />
+        <NavSecondary 
+          items={data.navTools} 
+          title="Outils"
+        />
+        <div className="mt-auto">
+          <SidebarSeparator className="mx-4 my-2 w-auto" />
+          <NavSecondary items={data.navSecondary} />
+        </div>
       </SidebarContent>
       <SidebarFooter className="md:hidden">
         <NavUser />

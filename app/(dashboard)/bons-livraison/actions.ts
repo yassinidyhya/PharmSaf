@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { NoteStatus } from "@prisma/client";
 import { logDeliveryNotePrint } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
 
 export interface DeliveryNoteFilters {
   year?: number;
@@ -192,7 +192,7 @@ export async function logPrintAction(id: string) {
       return { success: false, error: "Bon non trouvé" };
     }
 
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logDeliveryNotePrint(
       userId || undefined,
       note.id,

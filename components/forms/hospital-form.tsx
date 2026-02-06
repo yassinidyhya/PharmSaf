@@ -29,7 +29,7 @@ const hospitalSchema = z.object({
   code: z.string().min(1, "Le code est requis"),
   name: z.string().min(1, "Le nom est requis"),
   type: z.nativeEnum(HospitalType, {
-    errorMap: () => ({ message: "Le type est requis" }),
+    message: "Le type est requis",
   }),
   address: z.string().optional(),
   phone: z.string().optional(),
@@ -56,7 +56,7 @@ export function HospitalForm({ hospital, onSuccess }: HospitalFormProps) {
   const isEditing = !!hospital;
 
   const form = useForm<HospitalInput>({
-    resolver: zodResolver(hospitalSchema),
+    resolver: zodResolver(hospitalSchema) as any,
     defaultValues: {
       code: hospital?.code || "",
       name: hospital?.name || "",

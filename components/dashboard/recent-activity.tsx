@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { IconArrowDownLeft, IconArrowUpRight, IconHistory, IconArrowRight } from "@tabler/icons-react";
+import { RippleButton } from "@/components/ui/ripple-button";
 import {
   Card,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatNumber } from "@/lib/utils";
@@ -95,27 +100,27 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   const groupedActivities = groupActivitiesByDate(activities);
 
   return (
-    <Card>
-      <CardContent className="pt-4">
-        {/* Stats Summary */}
-        <div className="flex items-center gap-3 mb-4 pb-3 border-b">
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-muted-foreground">{entryCount} entrée{entryCount !== 1 ? 's' : ''}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span className="text-muted-foreground">{exitCount} sortie{exitCount !== 1 ? 's' : ''}</span>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base sm:text-lg">Activité Récente</CardTitle>
+            <CardDescription className="text-[10px] sm:text-xs">
+              {entryCount} entrée{entryCount !== 1 ? 's' : ''} · {exitCount} sortie{exitCount !== 1 ? 's' : ''}
+            </CardDescription>
           </div>
         </div>
+      </CardHeader>
+      <CardContent className="flex-1">
 
         {activities.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-muted-foreground py-6">
-            <p className="text-sm font-medium">Aucune activité</p>
-            <p className="text-xs mt-0.5">Les mouvements apparaîtront ici</p>
+          <div className="flex flex-col items-center justify-center py-6 h-full text-center">
+            <IconHistory className="w-10 h-10 mb-3 text-muted-foreground/50" />
+            <p className="text-sm font-medium text-muted-foreground">Aucune activité</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">Les mouvements apparaîtront ici</p>
           </div>
         ) : (
-          <ScrollArea className="h-[200px] sm:h-[240px] pr-3">
+          <ScrollArea className="h-[180px] sm:h-[200px] lg:h-[240px] pr-2 sm:pr-3">
             <div className="space-y-4">
               {groupedActivities.map((group) => (
                 <div key={group.label}>
@@ -137,31 +142,37 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                           key={activity.id}
                           href={isEntry ? `/inventaire/entrees` : `/inventaire/sorties`}
                           className={cn(
-                            "group flex items-center justify-between p-2 rounded-md border transition-all",
+                            "group flex items-center justify-between p-1.5 sm:p-2 rounded-md border transition-all",
                             "hover:bg-muted/50 hover:border-primary/20"
                           )}
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             {/* Entry/Exit Indicator */}
                             <div className={cn(
-                              "w-1.5 h-1.5 rounded-full shrink-0",
-                              isEntry ? "bg-emerald-500" : "bg-rose-500"
-                            )} />
+                              "w-6 h-6 sm:w-7 sm:h-7 rounded-md flex items-center justify-center shrink-0",
+                              isEntry ? "bg-emerald-100 text-emerald-600" : "bg-rose-100 text-rose-600"
+                            )}>
+                              {isEntry ? (
+                                <IconArrowDownLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              ) : (
+                                <IconArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              )}
+                            </div>
 
                             {/* Content */}
                             <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-medium text-sm truncate" title={activity.productName}>
+                              <div className="flex items-center gap-1 sm:gap-1.5">
+                                <span className="font-medium text-xs sm:text-sm truncate" title={activity.productName}>
                                   {activity.productName}
                                 </span>
                               </div>
                               
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
                                 <span>{formatRelativeTime(activity.date)}</span>
                                 {activity.hospitalName && (
                                   <>
                                     <span>•</span>
-                                    <span className="truncate max-w-[80px] sm:max-w-[120px]" title={activity.hospitalName}>
+                                    <span className="truncate max-w-[60px] sm:max-w-[80px] lg:max-w-[120px]" title={activity.hospitalName}>
                                       {activity.hospitalName}
                                     </span>
                                   </>
@@ -171,14 +182,14 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                           </div>
 
                           {/* Quantity */}
-                          <div className="text-right shrink-0 ml-2">
+                          <div className="text-right shrink-0 ml-1.5 sm:ml-2">
                             <span className={cn(
-                              "font-semibold text-sm",
+                              "font-semibold text-xs sm:text-sm",
                               isEntry ? "text-emerald-600" : "text-rose-600"
                             )}>
                               {isEntry ? "+" : "-"}{formatNumber(activity.quantity)}
                             </span>
-                            <span className="text-xs text-muted-foreground ml-0.5">
+                            <span className="text-[10px] sm:text-xs text-muted-foreground ml-0.5">
                               {activity.unit}
                             </span>
                           </div>
@@ -193,17 +204,13 @@ export function RecentActivity({ activities }: RecentActivityProps) {
         )}
       </CardContent>
 
-      <CardFooter className="pt-0 pb-3">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="w-full text-xs" 
-          asChild
-        >
-          <Link href="/inventaire">
-            Voir tout l&apos;historique
-          </Link>
-        </Button>
+      <CardFooter className="pt-0 pb-3 justify-center">
+        <Link href="/inventaire">
+          <RippleButton rippleColor="hsl(var(--primary))" className="hover:text-primary hover:border-primary/50">
+            <span>Voir tout l&apos;historique</span>
+            <IconArrowRight className="w-3 h-3 ml-1" />
+          </RippleButton>
+        </Link>
       </CardFooter>
     </Card>
   );

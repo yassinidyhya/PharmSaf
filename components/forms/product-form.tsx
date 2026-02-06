@@ -39,7 +39,7 @@ export function ProductForm() {
   const router = useRouter();
 
   const form = useForm<CreateProductInput>({
-    resolver: zodResolver(createProductSchema),
+    resolver: zodResolver(createProductSchema) as any,
     defaultValues: {
       code: "",
       name: "",

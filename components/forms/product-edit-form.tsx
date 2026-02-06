@@ -44,7 +44,7 @@ export function ProductEditForm({ product, onSuccess }: ProductEditFormProps) {
   const router = useRouter();
 
   const form = useForm<UpdateProductInput>({
-    resolver: zodResolver(updateProductSchema),
+    resolver: zodResolver(updateProductSchema) as any,
     defaultValues: {
       code: product.code,
       name: product.name,

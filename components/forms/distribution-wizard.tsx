@@ -162,7 +162,7 @@ export function DistributionWizard() {
       })),
     });
 
-    if (result.success) {
+    if (result.success && result.data) {
       toast.success("Distribution créée avec succès");
       setDeliveryNote(result.data.deliveryNote);
       setStep(5);
@@ -536,9 +536,9 @@ export function DistributionWizard() {
                         </div>
                         <Badge
                           variant="outline"
-                          className={categoryColors[product.category]}
+                          className={categoryColors[product.category as Category]}
                         >
-                          {categoryLabels[product.category]}
+                          {categoryLabels[product.category as Category]}
                         </Badge>
                       </div>
                       <div className="space-y-2">

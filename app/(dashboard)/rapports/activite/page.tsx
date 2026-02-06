@@ -84,10 +84,10 @@ export default function ActivityReportPage() {
       getUsersForFilter(),
     ]);
 
-    if (logsResult.success) {
+    if (logsResult.success && logsResult.data) {
       setLogs(logsResult.data);
     }
-    if (usersResult.success) {
+    if (usersResult.success && usersResult.data) {
       setUsers(usersResult.data);
     }
     setLoading(false);
@@ -104,7 +104,7 @@ export default function ActivityReportPage() {
     const result = await getActivityLogs(
       Object.keys(filterData).length > 0 ? filterData : undefined
     );
-    if (result.success) {
+    if (result.success && result.data) {
       setLogs(result.data);
     }
     setLoading(false);

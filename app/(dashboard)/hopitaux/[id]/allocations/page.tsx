@@ -375,7 +375,7 @@ export default function HospitalAllocationsPage() {
             <DialogDescription>
               Modifier le budget pour{" "}
               {editingAllocation &&
-                categoryLabels[editingAllocation.category]}{" "}
+                categoryLabels[editingAllocation.category as Category]}{" "}
               ({editingAllocation?.year})
             </DialogDescription>
           </DialogHeader>

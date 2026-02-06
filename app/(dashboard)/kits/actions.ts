@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { logCreate, logUpdate } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
 
 const createKitSchema = z.object({
   kitNumber: z.string().min(1, "Le numéro de kit est requis"),
@@ -157,7 +157,7 @@ export async function createKit(formData: FormData) {
     });
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logCreate(
       userId || undefined,
       "BirthKit",
@@ -308,7 +308,7 @@ export async function distributeKit(kitId: string, hospitalId: string) {
       where: { id: hospitalId },
       select: { name: true },
     });
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     await logUpdate(
       userId || undefined,
       "BirthKit",

@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { 
+  IconPill, 
+  IconVaccine, 
+  IconFlask, 
+  IconPackage,
+  IconTools,
+  IconPaperclip
+} from "@tabler/icons-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Category } from "@prisma/client";
@@ -25,36 +33,43 @@ const categoryConfig: Record<Category, {
   label: string;
   color: string;
   progressColor: string;
+  icon: React.ElementType;
 }> = {
   MEDICAMENT: {
     label: "Médicaments",
     color: "text-blue-600 dark:text-blue-400",
     progressColor: "bg-blue-500",
+    icon: IconPill,
   },
   VACCIN: {
     label: "Vaccins",
     color: "text-emerald-600 dark:text-emerald-400",
     progressColor: "bg-emerald-500",
+    icon: IconVaccine,
   },
   REACTIF: {
     label: "Réactifs",
     color: "text-violet-600 dark:text-violet-400",
     progressColor: "bg-violet-500",
+    icon: IconFlask,
   },
   CONSOMMABLE: {
     label: "Consommables",
     color: "text-amber-600 dark:text-amber-400",
     progressColor: "bg-amber-500",
+    icon: IconPackage,
   },
   PETIT_MATERIEL: {
     label: "Petit Matériel",
     color: "text-cyan-600 dark:text-cyan-400",
     progressColor: "bg-cyan-500",
+    icon: IconTools,
   },
   MATERIEL_BUREAU: {
     label: "Matériel Bureau",
     color: "text-slate-600 dark:text-slate-400",
     progressColor: "bg-slate-500",
+    icon: IconPaperclip,
   },
 };
 
@@ -82,9 +97,15 @@ export function CategoryStats({ data }: CategoryStatsProps) {
   
   if (activeCategories.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          <p className="text-sm">Aucune donnée disponible</p>
+      <Card className="h-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg">Stock par Catégorie</CardTitle>
+          <CardDescription className="text-xs">Niveaux de stock et mois de couverture</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <IconPackage className="w-10 h-10 mb-3 text-muted-foreground/50" />
+          <p className="text-sm font-medium text-muted-foreground">Aucune donnée disponible</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Les statistiques apparaîtront ici</p>
         </CardContent>
       </Card>
     );
@@ -124,12 +145,15 @@ export function CategoryStats({ data }: CategoryStatsProps) {
                 <div className="space-y-3">
                   {/* Header */}
                   <div className="flex items-center justify-between">
-                    <h3 className={cn(
-                      "font-semibold text-sm sm:text-base group-hover:text-primary transition-colors",
-                      config.color
-                    )}>
-                      {config.label}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <config.icon className={cn("w-5 h-5", config.color)} />
+                      <h3 className={cn(
+                        "font-semibold text-sm sm:text-base group-hover:text-primary transition-colors",
+                        config.color
+                      )}>
+                        {config.label}
+                      </h3>
+                    </div>
                     <Badge 
                       variant={stockStatus.badgeVariant}
                       className="text-[10px]"
