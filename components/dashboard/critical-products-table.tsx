@@ -41,6 +41,7 @@ interface CriticalProductsTableProps {
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicament",
   VACCIN: "Vaccin",
+  INSULINE: "Insuline",
   REACTIF: "Réactif",
   CONSOMMABLE: "Consommable",
   PETIT_MATERIEL: "Petit Matériel",
@@ -50,6 +51,7 @@ const categoryLabels: Record<Category, string> = {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
   VACCIN: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+  INSULINE: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
   REACTIF: "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
   CONSOMMABLE: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
   PETIT_MATERIEL: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",

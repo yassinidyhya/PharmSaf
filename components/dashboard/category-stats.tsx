@@ -7,7 +7,8 @@ import {
   IconFlask, 
   IconPackage,
   IconTools,
-  IconPaperclip
+  IconPaperclip,
+  IconNeedle
 } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,12 @@ const categoryConfig: Record<Category, {
     color: "text-emerald-600 dark:text-emerald-400",
     progressColor: "bg-emerald-500",
     icon: IconVaccine,
+  },
+  INSULINE: {
+    label: "Insuline",
+    color: "text-red-600 dark:text-red-400",
+    progressColor: "bg-red-500",
+    icon: IconNeedle,
   },
   REACTIF: {
     label: "Réactifs",

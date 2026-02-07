@@ -46,6 +46,7 @@ import { Category } from "@/lib/types";
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicament",
   VACCIN: "Vaccin",
+  INSULINE: "Insuline",
   REACTIF: "Réactif",
   CONSOMMABLE: "Consommable",
   PETIT_MATERIEL: "Petit matériel",

@@ -20,6 +20,7 @@ interface StockCoverageWidgetProps {
 const categoryColors: Record<Category, { bg: string; text: string; bar: string }> = {
   MEDICAMENT: { bg: "bg-blue-50", text: "text-blue-700", bar: "bg-blue-500" },
   VACCIN: { bg: "bg-green-50", text: "text-green-700", bar: "bg-green-500" },
+  INSULINE: { bg: "bg-red-50", text: "text-red-700", bar: "bg-red-500" },
   REACTIF: { bg: "bg-purple-50", text: "text-purple-700", bar: "bg-purple-500" },
   CONSOMMABLE: { bg: "bg-orange-50", text: "text-orange-700", bar: "bg-orange-500" },
   PETIT_MATERIEL: { bg: "bg-gray-50", text: "text-gray-700", bar: "bg-gray-500" },
