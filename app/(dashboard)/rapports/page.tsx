@@ -9,6 +9,7 @@ import {
   Package,
   Download,
   ArrowRight,
+  Syringe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +50,13 @@ const reportTypes = [
     icon: Users,
     href: "/rapports/activite",
     color: "bg-purple-500",
+  },
+  {
+    title: "Distribution Insuline",
+    description: "Suivi des distributions d'insuline (on-demand)",
+    icon: Syringe,
+    href: "/rapports/insuline",
+    color: "bg-red-500",
   },
 ];
 

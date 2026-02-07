@@ -18,6 +18,7 @@ interface StockCoverageChartProps {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "#3b82f6",
   VACCIN: "#22c55e",
+  INSULINE: "#ef4444",
   REACTIF: "#a855f7",
   CONSOMMABLE: "#f97316",
   PETIT_MATERIEL: "#6b7280",

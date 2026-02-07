@@ -26,6 +26,7 @@ interface CategoryDistributionProps {
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Médicaments",
   VACCIN: "Vaccins",
+  INSULINE: "Insuline",
   REACTIF: "Réactifs",
   CONSOMMABLE: "Consommables",
   PETIT_MATERIEL: "Petit Matériel",
@@ -35,6 +36,7 @@ const categoryLabels: Record<Category, string> = {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "bg-blue-500",
   VACCIN: "bg-emerald-500",
+  INSULINE: "bg-red-500",
   REACTIF: "bg-violet-500",
   CONSOMMABLE: "bg-amber-500",
   PETIT_MATERIEL: "bg-cyan-500",

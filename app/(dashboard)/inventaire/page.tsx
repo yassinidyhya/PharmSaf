@@ -84,6 +84,12 @@ const categoryConfig: Record<Category, {
     progressColor: "bg-emerald-500",
     icon: IconPackage,
   },
+  INSULINE: {
+    label: "Insuline",
+    color: "text-red-600 dark:text-red-400",
+    progressColor: "bg-red-500",
+    icon: IconPill,
+  },
   REACTIF: {
     label: "Reactifs",
     color: "text-violet-600 dark:text-violet-400",

@@ -102,6 +102,11 @@ const PRODUCTS_DATA = [
   { name: "Catheter IV 18G", category: Category.CONSOMMABLE, unit: "unité", packaging: "BOITE DE 50", price: 280.00, minStock: 200 },
   { name: "Catheter IV 20G", category: Category.CONSOMMABLE, unit: "unité", packaging: "BOITE DE 50", price: 280.00, minStock: 200 },
   
+  // Insuline (on-demand, not quarterly planned)
+  { name: "Insuline humaine semi lente mélange 30/70 fl 100UI/ml", category: Category.INSULINE, unit: "flacon", packaging: "BOITE DE 1", price: 18.75, minStock: 100 },
+  { name: "Insuline humaine semi lente simple fl 100UI/ml", category: Category.INSULINE, unit: "flacon", packaging: "BOITE DE 1", price: 19.00, minStock: 80 },
+  { name: "Insuline rapide fl 100 ui humaine", category: Category.INSULINE, unit: "flacon", packaging: "BOITE DE 1", price: 19.60, minStock: 80 },
+  
   // Petit matériel
   { name: "Tensiomètre manuel", category: Category.PETIT_MATERIEL, unit: "unité", packaging: "BOITE DE 1", price: 850.00, minStock: 20 },
   { name: "Stéthoscope", category: Category.PETIT_MATERIEL, unit: "unité", packaging: "BOITE DE 1", price: 650.00, minStock: 25 },
@@ -299,9 +304,10 @@ async function seedAnnualAllocations(hospitals: any[]) {
       const weights: Record<Category, number> = {
         [Category.MEDICAMENT]: 0.35,
         [Category.VACCIN]: 0.20,
+        [Category.INSULINE]: 0.10,
         [Category.REACTIF]: 0.10,
-        [Category.CONSOMMABLE]: 0.20,
-        [Category.PETIT_MATERIEL]: 0.10,
+        [Category.CONSOMMABLE]: 0.15,
+        [Category.PETIT_MATERIEL]: 0.05,
         [Category.MATERIEL_BUREAU]: 0.05,
       };
       

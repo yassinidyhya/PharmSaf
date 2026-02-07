@@ -17,6 +17,7 @@ interface InventoryBarChartProps {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "#3b82f6",    // blue-500
   VACCIN: "#22c55e",        // green-500
+  INSULINE: "#ef4444",      // red-500
   REACTIF: "#a855f7",       // purple-500
   CONSOMMABLE: "#f97316",   // orange-500
   PETIT_MATERIEL: "#6b7280", // gray-500

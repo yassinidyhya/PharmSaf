@@ -65,6 +65,7 @@ interface InventoryDataTableProps {
 const categoryLabels: Record<Category, string> = {
   MEDICAMENT: "Medicament",
   VACCIN: "Vaccin",
+  INSULINE: "Insuline",
   REACTIF: "Reactif",
   CONSOMMABLE: "Consommable",
   PETIT_MATERIEL: "Petit materiel",
@@ -74,6 +75,7 @@ const categoryLabels: Record<Category, string> = {
 const categoryColors: Record<Category, string> = {
   MEDICAMENT: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   VACCIN: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  INSULINE: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
   REACTIF: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
   CONSOMMABLE: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
   PETIT_MATERIEL: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",

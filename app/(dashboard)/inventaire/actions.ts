@@ -286,6 +286,7 @@ export async function getStockCoverage() {
       const optimalRanges: Record<Category, { min: number; max: number }> = {
         MEDICAMENT: { min: 3, max: 6 },
         VACCIN: { min: 3, max: 6 },
+        INSULINE: { min: 2, max: 4 },
         REACTIF: { min: 2, max: 4 },
         CONSOMMABLE: { min: 2, max: 4 },
         PETIT_MATERIEL: { min: 6, max: 12 },

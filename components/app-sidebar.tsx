@@ -49,7 +49,7 @@ const data = {
     },
     {
       title: "Insuline",
-      url: "/produits?category=INSULINE",
+      url: "/insuline",
       icon: IconVaccine,
     },
     {

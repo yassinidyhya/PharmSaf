@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Plus, TrendingDown, Building2, Package } from "lucide-react";
+import { ArrowLeft, Plus, TrendingDown, Building2, Package, Syringe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -121,12 +121,20 @@ export default function StockExitsPage() {
             </p>
           </div>
         </div>
-        <Button asChild>
-          <Link href="/inventaire/sorties/nouveau">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle Sortie
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/inventaire/sorties/nouveau?type=insulin">
+              <Syringe className="mr-2 h-4 w-4 text-red-500" />
+              Distribution Insuline
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/inventaire/sorties/nouveau">
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle Sortie
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
