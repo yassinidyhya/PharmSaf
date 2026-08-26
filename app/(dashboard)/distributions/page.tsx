@@ -156,10 +156,10 @@ export default function DistributionsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatNumber(q._count.id)}
+                {formatNumber(typeof q._count === "object" ? q._count?.id ?? 0 : q._count ?? 0)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {formatNumber(q._sum.quantity || 0)} unités
+                {formatNumber(q._sum?.quantity ?? 0)} unités
               </p>
             </CardContent>
           </Card>
@@ -184,7 +184,7 @@ export default function DistributionsPage() {
                   setFilters({ ...filters, year: value === "all" ? undefined : parseInt(value) })
                 }
               >
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-30">
                   <SelectValue placeholder="Toutes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -206,7 +206,7 @@ export default function DistributionsPage() {
                   setFilters({ ...filters, quarter: value === "all" ? undefined : parseInt(value) })
                 }
               >
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-30">
                   <SelectValue placeholder="Tous" />
                 </SelectTrigger>
                 <SelectContent>
@@ -227,7 +227,7 @@ export default function DistributionsPage() {
                   setFilters({ ...filters, hospitalId: value === "all" ? undefined : value })
                 }
               >
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-50">
                   <SelectValue placeholder="Tous les hôpitaux" />
                 </SelectTrigger>
                 <SelectContent>

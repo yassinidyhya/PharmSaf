@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { UserButton } from "@clerk/nextjs"
+import { AuthUserButton } from "@/components/auth-user-button";
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -112,14 +112,7 @@ export function SiteHeader() {
         </Breadcrumb>
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden md:block">
-            <UserButton 
-              afterSignOutUrl="/sign-in"
-              appearance={{
-                elements: {
-                  avatarBox: "h-8 w-8 rounded-lg",
-                },
-              }}
-            />
+            <AuthUserButton />
           </div>
         </div>
       </div>

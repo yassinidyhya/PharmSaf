@@ -257,6 +257,26 @@ export async function createMultiStockExit(data: {
   }
 }
 
+export async function createStockExit(formData: FormData) {
+  const hospitalId = formData.get("hospitalId") as string;
+  const productId = formData.get("productId") as string;
+  const batchId = formData.get("batchId") as string;
+  const quantity = Number(formData.get("quantity"));
+  const quarter = Number(formData.get("quarter"));
+  const year = Number(formData.get("year"));
+  const notes = (formData.get("notes") as string) || undefined;
+  const exitDate = (formData.get("exitDate") as string) || undefined;
+
+  return createMultiStockExit({
+    hospitalId,
+    items: [{ productId, batchId, quantity }],
+    quarter,
+    year,
+    notes,
+    exitDate,
+  });
+}
+
 export async function getProductsWithStock() {
   try {
     const products = await prisma.product.findMany({

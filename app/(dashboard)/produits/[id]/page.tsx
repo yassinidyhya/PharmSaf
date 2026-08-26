@@ -108,7 +108,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <Boxes className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(product._count.batches)}</div>
+            <div className="text-2xl font-bold">{formatNumber(product._count?.batches ?? 0)}</div>
             <p className="text-xs text-muted-foreground">Lots en stock</p>
           </CardContent>
         </Card>
@@ -119,7 +119,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <TrendingDown className="h-4 w-4 text-muted-foreground rotate-180" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(product._count.stockEntries)}</div>
+            <div className="text-2xl font-bold">{formatNumber(product._count?.stockEntries ?? 0)}</div>
             <p className="text-xs text-muted-foreground">Mouvements d&apos;entrée</p>
           </CardContent>
         </Card>
@@ -130,7 +130,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(product._count.stockExits)}</div>
+            <div className="text-2xl font-bold">{formatNumber(product._count?.stockExits ?? 0)}</div>
             <p className="text-xs text-muted-foreground">Mouvements de sortie</p>
           </CardContent>
         </Card>

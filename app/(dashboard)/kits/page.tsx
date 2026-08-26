@@ -165,7 +165,7 @@ export default function KitsPage() {
       <div className="flex items-center gap-2">
         <Filter className="h-4 w-4 text-muted-foreground" />
         <Select value={filter} onValueChange={(v) => setFilter(v as any)}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-50">
             <SelectValue placeholder="Filtrer" />
           </SelectTrigger>
           <SelectContent>
@@ -219,7 +219,7 @@ export default function KitsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span>{kit._count.components} articles</span>
+                          <span>{kit._count?.components ?? kit.components?.length ?? 0} articles</span>
                           {kit.isComplete ? (
                             <CheckCircle className="h-4 w-4 text-green-600" />
                           ) : (

@@ -143,7 +143,7 @@ export default function DeliveryNotesPage() {
                   })
                 }
               >
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-30">
                   <SelectValue placeholder="Toutes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -168,7 +168,7 @@ export default function DeliveryNotesPage() {
                   })
                 }
               >
-                <SelectTrigger className="w-[120px]">
+                <SelectTrigger className="w-30">
                   <SelectValue placeholder="Tous" />
                 </SelectTrigger>
                 <SelectContent>
@@ -192,7 +192,7 @@ export default function DeliveryNotesPage() {
                   })
                 }
               >
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-37.5">
                   <SelectValue placeholder="Tous" />
                 </SelectTrigger>
                 <SelectContent>
@@ -290,7 +290,7 @@ export default function DeliveryNotesPage() {
                           T{note.quarter} {note.year}
                         </Badge>
                       </TableCell>
-                      <TableCell>{note._count.items} article(s)</TableCell>
+                      <TableCell>{note._count?.items ?? note.items?.length ?? 0} article(s)</TableCell>
                       <TableCell className="font-medium">
                         {formatCurrency(Number(note.totalAmount || 0))}
                       </TableCell>

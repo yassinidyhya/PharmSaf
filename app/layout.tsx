@@ -1,6 +1,5 @@
+import React from "react";
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
-import { frFR } from "@clerk/localizations";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 
@@ -14,20 +13,30 @@ export const metadata: Metadata = {
   description: "Système de gestion de pharmacie",
 };
 
-export default function RootLayout({
+const isMockMode = process.env.USE_MOCK_DATA === "true";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <ClerkProvider localization={frFR}>
-      <html lang="fr">
-        <body
-          className={`${outfit.variable} font-sans antialiased`}
-        >
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
+  const htmlContent = (
+    <html lang="fr">
+      <body className={`${outfit.variable} font-sans antialiased`}>
+        {children}
+      </body>
+    </html>
   );
+
+  if (isMockMode) {
+    return htmlContent;
+  }
+
+  // Dynamically import Clerk only in non-mock mode so the publishable key
+  // is never validated when running with USE_MOCK_DATA=true.
+  const { ClerkProvider } = await import("@clerk/nextjs");
+  const { frFR } = await import("@clerk/localizations");
+
+  return <ClerkProvider localization={frFR}>{htmlContent}</ClerkProvider>;
 }
+

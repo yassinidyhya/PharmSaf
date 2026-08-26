@@ -44,7 +44,8 @@ export function ProductForm() {
     },
   });
 
-  const hasInitialStock = form.watch("initialQuantity") && form.watch("initialQuantity") > 0;
+  const initialQuantity = form.watch("initialQuantity");
+  const hasInitialStock = typeof initialQuantity === "number" && initialQuantity > 0;
 
   async function onSubmit(data: CreateProductInput) {
     setIsPending(true);

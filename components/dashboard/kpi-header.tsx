@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useUser } from "@clerk/nextjs"
+import { useAuthUser } from "@/hooks/use-auth-user"
 import { format, subDays } from "date-fns"
 import { fr } from "date-fns/locale"
 import { 
@@ -65,7 +65,7 @@ const presets = [
 ]
 
 export function KpiHeader({ stats, dateRange, onDateRangeChange }: KpiHeaderProps) {
-  const { user } = useUser()
+  const { user } = useAuthUser()
   const today = new Date()
   const [calendarOpen, setCalendarOpen] = React.useState(false)
   const [selectedRange, setSelectedRange] = React.useState<{ from?: Date; to?: Date }>({

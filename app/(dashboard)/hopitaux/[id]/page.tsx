@@ -142,7 +142,7 @@ export default async function HospitalDetailPage({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(hospital._count.stockExits)}
+              {formatNumber(hospital._count?.stockExits ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground">Sorties de stock</p>
           </CardContent>
@@ -155,7 +155,7 @@ export default async function HospitalDetailPage({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(hospital._count.allocations)}
+              {formatNumber(hospital._count?.allocations ?? 0)}
             </div>
             <p className="text-xs text-muted-foreground">Budgets annuels</p>
           </CardContent>

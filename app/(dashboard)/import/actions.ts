@@ -11,7 +11,14 @@ import {
   ParsedHospital,
 } from "@/lib/excel/import";
 import { logImport } from "@/lib/audit-log";
-import { auth } from "@clerk/nextjs/server";
+// Mock-aware auth helper — returns demo user ID in mock mode, real Clerk userId otherwise
+const isMockMode = process.env.USE_MOCK_DATA === "true";
+async function getUserId(): Promise<string | null> {
+  if (isMockMode) return "user-demo";
+  const { auth } = await import("@clerk/nextjs/server");
+  const { userId } = await auth();
+  return userId;
+}
 
 interface ImportSummary {
   total: number;
@@ -89,7 +96,7 @@ export async function importProducts(fileBuffer: Buffer) {
     revalidatePath("/produits");
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getUserId();
     await logImport(userId || undefined, "products", summary.total, summary.created, summary.updated);
 
     return {
@@ -199,7 +206,7 @@ export async function importStockEntries(fileBuffer: Buffer, userId: string) {
     revalidatePath("/inventaire/entrees");
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getUserId();
     await logImport(userId || undefined, "stock entries", summary.total, summary.created, summary.updated);
 
     return {
@@ -286,7 +293,7 @@ export async function importHospitals(fileBuffer: Buffer) {
     revalidatePath("/hopitaux");
 
     // Log activity
-    const { userId } = await auth();
+    const userId = await getUserId();
     await logImport(userId || undefined, "hospitals", summary.total, summary.created, summary.updated);
 
     return {

@@ -92,7 +92,7 @@ export async function getDistributionStats() {
         topHospitals: byHospital.map(h => ({
           hospitalId: h.hospitalId,
           hospitalName: hospitalMap.get(h.hospitalId) || "Inconnu",
-          count: h._count.id,
+          count: typeof h._count === "object" ? h._count?.id ?? 0 : h._count ?? 0,
         })),
       },
     };

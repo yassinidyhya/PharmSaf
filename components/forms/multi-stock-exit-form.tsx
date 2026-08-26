@@ -60,7 +60,7 @@ interface StockExitItem {
 
 interface MultiStockExitFormProps {
   products: ProductWithBatches[];
-  hospitals: Hospital[];
+  hospitals: Array<Pick<Hospital, "id" | "name" | "code" | "type">>;
   isInsulinMode?: boolean;
 }
 

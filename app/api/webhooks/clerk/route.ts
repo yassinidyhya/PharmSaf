@@ -123,7 +123,6 @@ async function handleUserCreated(data: any) {
         email: primaryEmail || "",
         firstName: first_name || "",
         lastName: last_name || "",
-        role: "USER",
         isActive: true,
       },
     });

@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useUser } from "@clerk/nextjs"
+import { useAuthUser } from "@/hooks/use-auth-user"
 
 import {
   CommandDialog,
@@ -33,7 +33,7 @@ interface CommandMenuProps {
 export function CommandMenu({ products = [], hospitals = [] }: CommandMenuProps) {
   const [open, setOpen] = React.useState(false)
   const router = useRouter()
-  const { user } = useUser()
+  const { user } = useAuthUser()
 
   // Keyboard shortcut to open command menu
   React.useEffect(() => {

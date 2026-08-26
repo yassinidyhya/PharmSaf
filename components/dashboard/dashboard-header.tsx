@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useAuthUser } from "@/hooks/use-auth-user";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -14,7 +14,7 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ onRefresh, isRefreshing }: DashboardHeaderProps) {
-  const { user } = useUser();
+  const { user } = useAuthUser();
   const currentDate = new Date();
   
   // Get first name from user

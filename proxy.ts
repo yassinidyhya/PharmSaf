@@ -1,58 +1,63 @@
 /**
- * Clerk Middleware Configuration
- * Handles route protection and authentication
+ * Middleware Configuration
+ * In mock mode (USE_MOCK_DATA=true): all routes are public, no Clerk needed.
+ * In production mode: Clerk handles authentication and route protection.
  */
 
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-// Define public routes (no authentication required)
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhooks(.*)", // Webhook routes must be public
-  "/api/public(.*)",
-]);
+const isMockMode = process.env.USE_MOCK_DATA === "true";
 
-// Define ignored routes (middleware won't run)
-const isIgnoredRoute = createRouteMatcher([
-  "/_next(.*)",
-  "/static(.*)",
-  "/favicon.ico",
-  "/robots.txt",
-  "/sitemap.xml",
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  // Skip ignored routes
-  if (isIgnoredRoute(req)) {
-    return NextResponse.next();
-  }
-
-  // Allow public routes without authentication
-  if (isPublicRoute(req)) {
-    return NextResponse.next();
-  }
-
-  // Protect all other routes
-  const { userId } = await auth();
-
-  if (!userId) {
-    // Redirect to sign-in page
-    const signInUrl = new URL("/sign-in", req.url);
-    signInUrl.searchParams.set("redirect_url", req.url);
-    return NextResponse.redirect(signInUrl);
-  }
-
+// ── Mock mode: skip Clerk entirely ───────────────────────────────────────────
+async function mockMiddleware(_req: NextRequest) {
   return NextResponse.next();
-});
+}
+
+// ── Production mode: Clerk-protected routes ───────────────────────────────────
+async function clerkProtectedMiddleware(req: NextRequest) {
+  const { clerkMiddleware, createRouteMatcher } = await import(
+    "@clerk/nextjs/server"
+  );
+
+  const isPublicRoute = createRouteMatcher([
+    "/",
+    "/sign-in(.*)",
+    "/sign-up(.*)",
+    "/api/webhooks(.*)",
+    "/api/public(.*)",
+  ]);
+
+  const isIgnoredRoute = createRouteMatcher([
+    "/_next(.*)",
+    "/static(.*)",
+    "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
+  ]);
+
+  return clerkMiddleware(async (auth, request) => {
+    if (isIgnoredRoute(request)) return NextResponse.next();
+    if (isPublicRoute(request)) return NextResponse.next();
+
+    const { userId } = await auth();
+    if (!userId) {
+      const signInUrl = new URL("/sign-in", request.url);
+      signInUrl.searchParams.set("redirect_url", request.url);
+      return NextResponse.redirect(signInUrl);
+    }
+    return NextResponse.next();
+  })(req, {} as any);
+}
+
+export default function middleware(req: NextRequest) {
+  if (isMockMode) return mockMiddleware(req);
+  return clerkProtectedMiddleware(req);
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and static files
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };
+
