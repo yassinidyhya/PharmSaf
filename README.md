@@ -1,209 +1,302 @@
-# PharmSaf 💊
+PharmSaf 💊
 
-> ⚠️ **Status: Work In Progress (Unfinished / En cours de développement)**
-> 
-> **Système de gestion de la pharmacie provinciale** — A full-stack pharmacy management system built for Moroccan provincial health facilities.
-> 
-> **Note:** This project is actively under development and is currently **unfinished**. Some features, modules, and integrations are experimental or under active refinement.
+⚠️ Status: Work in Progress (Unfinished / Under Development)
 
----
+Provincial pharmacy management system — A full-stack pharmacy management system built for Moroccan provincial healthcare facilities.
 
-## Overview
+Note: This project is actively under development and is currently unfinished. Some features, modules, and integrations are experimental or undergoing active refinement.
 
-PharmSaf is a Next.js web application that helps provincial pharmacies manage their medical stock, track distributions to hospitals, generate delivery notes, and audit all activity. It is specifically designed for the **Pharmacie Provinciale d'Essaouira** and follows Moroccan Ministry of Health workflows.
+Overview
 
----
+PharmSaf is a Next.js web application that helps provincial pharmacies manage medical stock, track distributions to hospitals, generate delivery notes, and audit all activity. It is specifically designed for the Essaouira Provincial Pharmacy and follows Moroccan Ministry of Health workflows.
 
-## Features
+Features
 
-| Module | Description |
-|---|---|
-| 📦 **Stock Management** | Track product inventory with batch/lot numbers and expiry dates |
-| 🏥 **Hospital Distribution** | Record quarterly stock exits to hospitals and health centers |
-| 📄 **Delivery Notes (Bons de Livraison)** | Auto-generate and print official delivery documents |
-| 💉 **Insulin On-Demand** | Special distribution mode for insulin with per-unit tracking |
-| 🎁 **Birth Kits (Kits Naissance)** | Assemble and distribute birth kits to facilities |
-| 📊 **Annual Allocations** | Manage yearly budgets per hospital and category |
-| 📈 **Dashboard & Reports** | Charts and statistics for stock consumption and trends |
-| 📥 **Excel Import** | Bulk import products and stock from Excel files |
-| 🔍 **Audit Trail** | Complete activity log for all CRUD and print operations |
-| 🌐 **French UI** | Fully localized interface in French |
+Module
 
----
+Description
 
-## Tech Stack
+📦 Stock Management
 
-- **Framework** — [Next.js 16](https://nextjs.org) (App Router, Server Actions)
-- **Language** — TypeScript
-- **Database** — MySQL / MariaDB via [Prisma ORM](https://prisma.io)
-- **Auth** — [Clerk](https://clerk.com) (with optional demo/mock mode)
-- **UI** — [Tailwind CSS v4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)
-- **Icons** — [Tabler Icons](https://tabler-icons.io) + [Lucide React](https://lucide.dev)
-- **Charts** — [Recharts](https://recharts.org) + [Tremor](https://tremor.so)
-- **PDF** — [@react-pdf/renderer](https://react-pdf.org)
-- **Excel** — [ExcelJS](https://github.com/exceljs/exceljs)
-- **Package Manager** — Bun / npm
+Track product inventory with batch/lot numbers and expiry dates
 
----
+🏥 Hospital Distribution
 
-## Getting Started
+Record quarterly stock exits to hospitals and health centers
 
-### Prerequisites
+📄 Delivery Notes
 
-- Node.js ≥ 18 or [Bun](https://bun.sh) ≥ 1.x
-- MySQL 8+ or MariaDB 10.6+
-- A [Clerk](https://clerk.com) account (for production auth)
+Automatically generate and print official delivery documents
 
-### 1. Clone the repository
+💉 Insulin On-Demand
 
-```bash
+Special distribution mode for insulin with per-unit tracking
+
+🎁 Birth Kits
+
+Assemble and distribute birth kits to healthcare facilities
+
+📊 Annual Allocations
+
+Manage yearly budgets per hospital and category
+
+📈 Dashboard & Reports
+
+Charts and statistics for stock consumption and trends
+
+📥 Excel Import
+
+Bulk import products and stock from Excel files
+
+🔍 Audit Trail
+
+Complete activity log for all CRUD and print operations
+
+🌐 French Interface
+
+Fully localized user interface in French
+
+Tech Stack
+
+Framework — Next.js 16 (App Router, Server Actions)
+
+Language — TypeScript
+
+Database — MySQL / MariaDB via Prisma ORM
+
+Authentication — Clerk (with optional demo/mock mode)
+
+UI — Tailwind CSS v4 + shadcn/ui
+
+Icons — Tabler Icons + Lucide React
+
+Charts — Recharts + Tremor
+
+PDF — @react-pdf/renderer
+
+Excel — ExcelJS
+
+Package Manager — Bun / npm
+
+Getting Started
+
+Prerequisites
+
+Node.js ≥ 18 or Bun ≥ 1.x
+
+MySQL 8+ or MariaDB 10.6+
+
+A Clerk account (for production authentication)
+
+1. Clone the repository
+
 git clone https://github.com/yassinidyhya/PharmSaf.git
 cd PharmSaf
-```
 
-### 2. Install dependencies
+2. Install dependencies
 
-```bash
 npm install
 # or
 bun install
-```
 
-### 3. Configure environment variables
+3. Configure environment variables
 
-```bash
 cp .env.local.example .env.local
-```
 
-Edit `.env.local` with your values. See [Environment Variables](#environment-variables) below.
+Edit .env.local with your values. See Environment Variables below.
 
-### 4a. Run with mock data (no database needed)
+4a. Run with mock data (no database required)
 
-Set `USE_MOCK_DATA="true"` in `.env.local`, then:
+Set USE_MOCK_DATA="true" in .env.local, then:
 
-```bash
 npm run dev
-```
 
-Login at `http://localhost:3000` with the demo credentials defined in your `.env.local`.
+Sign in at http://localhost:3000 using the demo credentials defined in your .env.local.
 
-### 4b. Run with a real database
+4b. Run with a real database
 
-1. Set `USE_MOCK_DATA="false"` and fill in `DATABASE_URL` in `.env.local`
-2. Run Prisma migrations:
-   ```bash
-   npx prisma migrate dev
-   ```
-3. (Optional) Seed the database:
-   ```bash
-   npm run db:seed
-   ```
-4. Start the dev server:
-   ```bash
-   npm run dev
-   ```
+Set USE_MOCK_DATA="false" and fill in DATABASE_URL in .env.local
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Run Prisma migrations:
 
----
+npx prisma migrate dev
 
-## Environment Variables
+(Optional) Seed the database:
 
-Copy [`.env.local.example`](.env.local.example) to `.env.local` and fill in all required values.
+npm run db:seed
 
-| Variable | Required | Description |
-|---|---|---|
-| `USE_MOCK_DATA` | ✅ | `"true"` for in-memory demo mode, `"false"` for real DB |
-| `DATABASE_URL` | DB mode | MySQL/MariaDB connection string for Prisma |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Auth mode | Clerk publishable key |
-| `CLERK_SECRET_KEY` | Auth mode | Clerk secret key |
-| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Auth mode | Sign-in route (default `/sign-in`) |
-| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Auth mode | Sign-up route (default `/sign-up`) |
-| `CLERK_WEBHOOK_SIGNING_SECRET` | Auth mode | Clerk webhook signing secret |
-| `CLERK_WEBHOOK_SECRET` | Auth mode | Clerk webhook secret |
-| `DEMO_EMAIL` | Mock mode | Login email for demo mode |
-| `DEMO_PASSWORD` | Mock mode | Login password for demo mode |
-| `DEMO_SESSION_SECRET` | Mock mode | Random secret to sign session cookie |
-| `NEXT_PUBLIC_APP_NAME` | Optional | Pharmacy display name shown in the UI |
-| `NEXT_PUBLIC_APP_LOCALE` | Optional | UI locale (default `fr`) |
+Start the development server:
 
----
+npm run dev
 
-## Database Schema
+Open http://localhost:3000 in your browser.
 
-The Prisma schema lives in [`prisma/schema.prisma`](prisma/schema.prisma). Key models:
+Environment Variables
 
-```
-User            — Clerk-synced user accounts
-Hospital        — Health facilities (CENTRE_HOSPITALIER, CENTRE_SANTE, HOPITAL_PROVINCIAL)
-Product         — Medical products with category, unit, and packaging info
-Batch           — Lot numbers with quantities and expiry dates
-StockEntry      — Incoming stock records
-StockExit       — Outgoing distributions linked to hospitals
-AnnualAllocation — Yearly budget per hospital per category
-DeliveryNote    — Official delivery documents (Bon de Livraison)
-BirthKit        — Birth kit assemblies and distributions
-ActivityLog     — Audit trail for all actions
-```
+Copy .env.local.example to .env.local and fill in all required values.
 
----
+Variable
 
-## Available Scripts
+Required
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the Next.js development server |
-| `npm run build` | Run `prisma generate` then build for production |
-| `npm run start` | Start the production server |
-| `npm run lint` | Run ESLint |
-| `npm run db:seed` | Seed the database with sample data |
-| `npm run db:reset` | Reset the database and re-seed |
+Description
 
----
+USE_MOCK_DATA
 
-## Project Structure
+✅
 
-```
+"true" for in-memory demo mode, "false" for a real database
+
+DATABASE_URL
+
+Database mode
+
+MySQL/MariaDB connection string for Prisma
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+Authentication mode
+
+Clerk publishable key
+
+CLERK_SECRET_KEY
+
+Authentication mode
+
+Clerk secret key
+
+NEXT_PUBLIC_CLERK_SIGN_IN_URL
+
+Authentication mode
+
+Sign-in route (default /sign-in)
+
+NEXT_PUBLIC_CLERK_SIGN_UP_URL
+
+Authentication mode
+
+Sign-up route (default /sign-up)
+
+CLERK_WEBHOOK_SIGNING_SECRET
+
+Authentication mode
+
+Clerk webhook signing secret
+
+CLERK_WEBHOOK_SECRET
+
+Authentication mode
+
+Clerk webhook secret
+
+DEMO_EMAIL
+
+Mock mode
+
+Login email for demo mode
+
+DEMO_PASSWORD
+
+Mock mode
+
+Login password for demo mode
+
+DEMO_SESSION_SECRET
+
+Mock mode
+
+Random secret used to sign the session cookie
+
+NEXT_PUBLIC_APP_NAME
+
+Optional
+
+Pharmacy display name shown in the interface
+
+NEXT_PUBLIC_APP_LOCALE
+
+Optional
+
+User interface locale (default fr)
+
+Database Schema
+
+The Prisma schema is located at prisma/schema.prisma. Key models:
+
+User             — Clerk-synced user accounts
+Hospital         — Healthcare facilities (HOSPITAL_CENTER, HEALTH_CENTER, PROVINCIAL_HOSPITAL)
+Product          — Medical products with category, unit, and packaging information
+Batch            — Lot numbers with quantities and expiry dates
+StockEntry       — Incoming stock records
+StockExit        — Outgoing distributions linked to hospitals
+AnnualAllocation — Yearly budget per hospital and category
+DeliveryNote     — Official delivery documents
+BirthKit         — Birth kit assemblies and distributions
+ActivityLog      — Audit trail for all actions
+
+Available Scripts
+
+Command
+
+Description
+
+npm run dev
+
+Start the Next.js development server
+
+npm run build
+
+Run prisma generate and build for production
+
+npm run start
+
+Start the production server
+
+npm run lint
+
+Run ESLint
+
+npm run db:seed
+
+Seed the database with sample data
+
+npm run db:reset
+
+Reset the database and seed it again
+
+Project Structure
+
 PharmSaf/
 ├── app/
-│   ├── (auth)/           # Sign-in / sign-up pages
-│   ├── (dashboard)/      # Main app pages (products, distributions, reports…)
-│   │   ├── actions.ts    # All server actions
-│   │   ├── page.tsx      # Dashboard home
-│   │   ├── produits/     # Product management
-│   │   ├── distributions/# Stock exit management
+│   ├── (auth)/             # Sign-in / sign-up pages
+│   ├── (dashboard)/        # Main application pages
+│   │   ├── actions.ts      # All server actions
+│   │   ├── page.tsx        # Dashboard home
+│   │   ├── produits/       # Product management
+│   │   ├── distributions/  # Stock exit management
 │   │   ├── bons-livraison/ # Delivery notes
-│   │   ├── hopitaux/     # Hospital management
-│   │   ├── insuline/     # Insulin on-demand
-│   │   ├── kits/         # Birth kits
-│   │   ├── inventaire/   # Inventory view
-│   │   ├── import/       # Excel import
-│   │   └── rapports/     # Reports
-│   ├── api/              # API routes (Clerk webhooks, etc.)
+│   │   ├── hopitaux/       # Hospital management
+│   │   ├── insuline/       # Insulin on-demand
+│   │   ├── kits/           # Birth kits
+│   │   ├── inventaire/     # Inventory view
+│   │   ├── import/         # Excel import
+│   │   └── rapports/       # Reports
+│   ├── api/                # API routes (Clerk webhooks, etc.)
 │   ├── globals.css
 │   └── layout.tsx
-├── components/           # Reusable UI components
+├── components/             # Reusable UI components
 ├── lib/
-│   ├── db.ts             # Prisma client singleton
-│   ├── auth.ts           # Clerk auth helpers
-│   └── mock-data.ts      # In-memory mock data store
+│   ├── db.ts               # Prisma client singleton
+│   ├── auth.ts             # Clerk authentication helpers
+│   └── mock-data.ts        # In-memory mock data store
 ├── prisma/
-│   ├── schema.prisma     # Database schema
-│   └── seed.ts           # Database seeder
-├── hooks/                # Custom React hooks
-├── public/               # Static assets
-├── .env.local.example    # Environment variable template
+│   ├── schema.prisma       # Database schema
+│   └── seed.ts             # Database seeder
+├── hooks/                  # Custom React hooks
+├── public/                 # Static assets
+├── .env.local.example      # Environment variable template
 └── package.json
-```
 
----
+Contributing
 
-## Contributing
-
-This project is maintained internally for the Pharmacie Provinciale d'Essaouira. Pull requests and issues are welcome from authorized contributors.
-
----
-
-## License
-
-Private — All rights reserved. © 2026 Pharmacie Provinciale Essaouira.
+This project is maintained internally for the Essaouira Provincial Pharmacy. Pull requests and issues are welcome from authorized contributors.
